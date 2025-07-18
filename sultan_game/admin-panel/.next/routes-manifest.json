@@ -18,7 +18,7 @@
     "afterFiles": [
       {
         "source": "/api/:path*",
-        "destination": "http://82.197.94.152:8001/:path*",
+        "destination": "http://82.197.94.152:8001/api/:path*",
         "regex": "^/api(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?(?:/)?$"
       }
     ],

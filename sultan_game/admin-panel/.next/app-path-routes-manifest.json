@@ -1,10 +1,10 @@
 {
   "/_not-found/page": "/_not-found",
   "/favicon.ico/route": "/favicon.ico",
+  "/cards/page": "/cards",
   "/ai-configs/page": "/ai-configs",
-  "/npcs/page": "/npcs",
+  "/page": "/",
   "/templates/page": "/templates",
   "/scenes/page": "/scenes",
-  "/page": "/",
-  "/cards/page": "/cards"
+  "/npcs/page": "/npcs"
 }
