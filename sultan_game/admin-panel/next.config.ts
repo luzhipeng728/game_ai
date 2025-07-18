@@ -47,6 +47,10 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  // 实验性功能，确保路径别名正确解析
+  experimental: {
+    externalDir: true,
+  },
   // 添加 allowedDevOrigins 配置
   allowedDevOrigins: ['82.197.94.152', 'game_ai.luzhipeng.com'],
 };

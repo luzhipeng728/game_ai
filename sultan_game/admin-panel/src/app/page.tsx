@@ -1,6 +1,6 @@
 'use client';
 
-import Layout from '../components/Layout';
+import Layout from '@/components/Layout';
 import { BarChart3, Users, Map, Brain, CreditCard } from 'lucide-react';
 
 export default function Home() {

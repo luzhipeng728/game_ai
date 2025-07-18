@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Layout from '../../components/Layout';
-import { ToastContainer, useToast } from '../../components/Toast';
+import Layout from '@/components/Layout';
+import { ToastContainer, useToast } from '@/components/Toast';
 import { FileText, Download, Upload, Edit, Trash2, Plus, Play } from 'lucide-react';
-import { templateAPI, sceneAPI, aiConfigAPI } from '../../lib/api';
+import { templateAPI, sceneAPI, aiConfigAPI } from '@/lib/api';
 
 interface Template {
   id: string;

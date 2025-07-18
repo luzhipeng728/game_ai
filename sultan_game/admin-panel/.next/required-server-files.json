@@ -170,7 +170,7 @@
       "optimizeCss": false,
       "nextScriptWorkers": false,
       "scrollRestoration": false,
-      "externalDir": false,
+      "externalDir": true,
       "disableOptimizedLoading": false,
       "gzipSize": true,
       "craCompat": false,
