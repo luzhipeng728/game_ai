@@ -1,0 +1,2655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>苏丹的游戏 - 全面管理后台</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .nav-link {
+            color: rgba(255,255,255,0.8) !important;
+            border-radius: 5px;
+            margin: 2px 0;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white !important;
+        }
+        .content-section {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .faction-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .attribute-input {
+            width: 80px;
+        }
+        .rarity-common { border-left: 4px solid #6c757d; }
+        .rarity-rare { border-left: 4px solid #0d6efd; }
+        .rarity-epic { border-left: 4px solid #6f42c1; }
+        .rarity-legendary { border-left: 4px solid #fd7e14; }
+        .status-active { color: #198754; }
+        .status-inactive { color: #dc3545; }
+        .validation-error { border-color: #dc3545; }
+        .validation-success { border-color: #198754; }
+        .mini-form {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .faction-sultan { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); }
+        .faction-minister { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
+        .faction-military { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
+        .faction-blackduck { background: linear-gradient(135deg, #374151 0%, #6b7280 100%); }
+        .faction-commoner { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+        .faction-scholar { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
+        .tab-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .balance-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .balance-good { background: #198754; }
+        .balance-warning { background: #ffc107; }
+        .balance-danger { background: #dc3545; }
+        .ai-config-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .progress-enhanced {
+            height: 25px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .progress-bar-enhanced {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: width 0.8s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Enhanced Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white mb-1">苏丹的游戏</h4>
+                        <small class="text-white-50">全面管理后台</small>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" data-section="dashboard">
+                                <i class="fas fa-tachometer-alt"></i> 仪表板
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="scenes">
+                                <i class="fas fa-theater-masks"></i> 场景管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="npcs">
+                                <i class="fas fa-users"></i> NPC管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="cards">
+                                <i class="fas fa-id-card"></i> 卡片系统
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="ai-configs">
+                                <i class="fas fa-robot"></i> AI配置
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="players">
+                                <i class="fas fa-crown"></i> 玩家管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="factions">
+                                <i class="fas fa-flag"></i> 阵营管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="balance">
+                                <i class="fas fa-balance-scale"></i> 平衡分析
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="analytics">
+                                <i class="fas fa-chart-bar"></i> 数据分析
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="system">
+                                <i class="fas fa-cog"></i> 系统配置
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                
+                <!-- Enhanced Dashboard -->
+                <div id="dashboard" class="content-section">
+                    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">管理仪表板</h1>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-primary" onclick="refreshAllData()">
+                                <i class="fas fa-sync-alt"></i> 刷新数据
+                            </button>
+                            <button class="btn btn-outline-success" onclick="exportData()">
+                                <i class="fas fa-download"></i> 导出数据
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-2">
+                            <div class="card stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-theater-masks fa-2x mb-2"></i>
+                                    <h3 id="total-scenes">-</h3>
+                                    <p class="mb-0">场景总数</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-2x mb-2"></i>
+                                    <h3 id="total-npcs">-</h3>
+                                    <p class="mb-0">NPC总数</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-id-card fa-2x mb-2"></i>
+                                    <h3 id="total-cards">-</h3>
+                                    <p class="mb-0">卡片总数</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-crown fa-2x mb-2"></i>
+                                    <h3 id="total-players">-</h3>
+                                    <p class="mb-0">玩家总数</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-flag fa-2x mb-2"></i>
+                                    <h3>6</h3>
+                                    <p class="mb-0">阵营数量</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-robot fa-2x mb-2"></i>
+                                    <h3 id="total-ai-configs">-</h3>
+                                    <p class="mb-0">AI配置</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Faction Overview -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-flag"></i> 六大阵营概览</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="card faction-sultan">
+                                                <div class="card-body text-center">
+                                                    <h6>苏丹王</h6>
+                                                    <p class="mb-1">NPC: <span id="sultan-npcs">-</span></p>
+                                                    <p class="mb-0">活跃度: <span id="sultan-activity">-</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="card faction-minister">
+                                                <div class="card-body text-center">
+                                                    <h6>大臣阵营</h6>
+                                                    <p class="mb-1">NPC: <span id="minister-npcs">-</span></p>
+                                                    <p class="mb-0">活跃度: <span id="minister-activity">-</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="card faction-military">
+                                                <div class="card-body text-center">
+                                                    <h6>将军阵营</h6>
+                                                    <p class="mb-1">NPC: <span id="military-npcs">-</span></p>
+                                                    <p class="mb-0">活跃度: <span id="military-activity">-</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="card faction-blackduck">
+                                                <div class="card-body text-center">
+                                                    <h6>黑鸭会</h6>
+                                                    <p class="mb-1">NPC: <span id="blackduck-npcs">-</span></p>
+                                                    <p class="mb-0">活跃度: <span id="blackduck-activity">-</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="card faction-commoner">
+                                                <div class="card-body text-center">
+                                                    <h6>平民阵营</h6>
+                                                    <p class="mb-1">NPC: <span id="commoner-npcs">-</span></p>
+                                                    <p class="mb-0">活跃度: <span id="commoner-activity">-</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="card faction-scholar">
+                                                <div class="card-body text-center">
+                                                    <h6>学者阵营</h6>
+                                                    <p class="mb-1">NPC: <span id="scholar-npcs">-</span></p>
+                                                    <p class="mb-0">活跃度: <span id="scholar-activity">-</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Health -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-heartbeat"></i> 系统健康状态</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span>数据库连接</span>
+                                            <span class="status-active"><i class="fas fa-check-circle"></i> 正常</span>
+                                        </div>
+                                        <div class="progress-enhanced mt-2">
+                                            <div class="progress-bar-enhanced" style="width: 100%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span>API服务</span>
+                                            <span class="status-active"><i class="fas fa-check-circle"></i> 运行中</span>
+                                        </div>
+                                        <div class="progress-enhanced mt-2">
+                                            <div class="progress-bar-enhanced" style="width: 95%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span>AI服务</span>
+                                            <span class="text-warning"><i class="fas fa-exclamation-triangle"></i> 配置中</span>
+                                        </div>
+                                        <div class="progress-enhanced mt-2">
+                                            <div class="progress-bar-enhanced" style="width: 60%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-chart-line"></i> 游戏平衡指数</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span>属性平衡</span>
+                                            <span><span class="balance-indicator balance-good"></span> 良好</span>
+                                        </div>
+                                        <div class="progress-enhanced mt-2">
+                                            <div class="progress-bar-enhanced" style="width: 85%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span>阵营平衡</span>
+                                            <span><span class="balance-indicator balance-warning"></span> 注意</span>
+                                        </div>
+                                        <div class="progress-enhanced mt-2">
+                                            <div class="progress-bar-enhanced" style="width: 70%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span>卡片平衡</span>
+                                            <span><span class="balance-indicator balance-good"></span> 良好</span>
+                                        </div>
+                                        <div class="progress-enhanced mt-2">
+                                            <div class="progress-bar-enhanced" style="width: 90%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scene Management Section -->
+                <div id="scenes" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">场景管理</h1>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="openSceneModal()">
+                                <i class="fas fa-plus"></i> 新建场景
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="importScenes()">
+                                <i class="fas fa-upload"></i> 导入场景
+                            </button>
+                            <button class="btn btn-outline-success" onclick="exportScenes()">
+                                <i class="fas fa-download"></i> 导出场景
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Scene Filters -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" id="scene-search" placeholder="搜索场景...">
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="scene-category-filter">
+                                <option value="">所有类型</option>
+                                <option value="main_story">主线剧情</option>
+                                <option value="side_quest">支线任务</option>
+                                <option value="faction">阵营场景</option>
+                                <option value="special">特殊事件</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="scene-faction-filter">
+                                <option value="">所有阵营</option>
+                                <option value="sultan">苏丹王</option>
+                                <option value="minister">大臣阵营</option>
+                                <option value="military">将军阵营</option>
+                                <option value="blackduck">黑鸭会</option>
+                                <option value="commoner">平民阵营</option>
+                                <option value="scholar">学者阵营</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="scene-difficulty-filter">
+                                <option value="">所有难度</option>
+                                <option value="easy">简单</option>
+                                <option value="medium">中等</option>
+                                <option value="hard">困难</option>
+                                <option value="expert">专家</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="scene-status-filter">
+                                <option value="">所有状态</option>
+                                <option value="active">激活</option>
+                                <option value="inactive">禁用</option>
+                                <option value="testing">测试中</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button class="btn btn-outline-primary w-100" onclick="filterScenes()">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Scene Tabs -->
+                    <ul class="nav nav-tabs mb-4" id="scene-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#scene-list">场景列表</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#scene-entry-conditions">进入条件</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#scene-dynamic-events">动态事件</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#scene-rewards">奖励配置</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#scene-npc-config">NPC配置</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- Scene List Tab -->
+                        <div class="tab-pane fade show active" id="scene-list">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-list"></i> 场景列表</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>场景ID</th>
+                                                    <th>场景名称</th>
+                                                    <th>类型</th>
+                                                    <th>阵营</th>
+                                                    <th>难度</th>
+                                                    <th>状态</th>
+                                                    <th>AI配置</th>
+                                                    <th>使用率</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="scenes-table-body">
+                                                <!-- Scene rows will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scene Entry Conditions Tab -->
+                        <div class="tab-pane fade" id="scene-entry-conditions">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-door-open"></i> 场景进入条件管理</h5>
+                                    <button class="btn btn-sm btn-primary float-end" onclick="openEntryConditionModal()">
+                                        <i class="fas fa-plus"></i> 新建条件
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="list-group" id="entry-conditions-list">
+                                                <!-- Entry conditions will be populated here -->
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div id="entry-condition-editor">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6>进入条件配置</h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <form id="entry-condition-form">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <h6>属性要求</h6>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label">玩家声望最低要求</label>
+                                                                        <input type="number" class="form-control" id="player-reputation-min" min="0" max="100">
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label">任意NPC智力要求</label>
+                                                                        <input type="number" class="form-control" id="any-npc-int-min" min="1" max="20">
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label">总武力要求</label>
+                                                                        <input type="number" class="form-control" id="total-str-min" min="0" max="600">
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label">总魅力要求</label>
+                                                                        <input type="number" class="form-control" id="total-cha-min" min="0" max="600">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <h6>前置条件</h6>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label">必须完成的场景</label>
+                                                                        <select class="form-select select2" id="completed-scenes" multiple>
+                                                                            <!-- Scene options will be populated -->
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label">游戏天数要求</label>
+                                                                        <input type="number" class="form-control" id="game-day-min" min="1">
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label">最大/最小NPC数量</label>
+                                                                        <div class="row">
+                                                                            <div class="col-6">
+                                                                                <input type="number" class="form-control" id="min-player-npcs" min="0" max="10" placeholder="最小">
+                                                                            </div>
+                                                                            <div class="col-6">
+                                                                                <input type="number" class="form-control" id="max-player-npcs" min="1" max="10" placeholder="最大">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <h6>卡片要求</h6>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="card">
+                                                                        <div class="card-header">
+                                                                            <h6>必需卡片（消耗）</h6>
+                                                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addRequiredCard()">
+                                                                                <i class="fas fa-plus"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                        <div class="card-body">
+                                                                            <div id="required-cards-list">
+                                                                                <!-- Required cards will be populated -->
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="card">
+                                                                        <div class="card-header">
+                                                                            <h6>可选卡片（增益）</h6>
+                                                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addOptionalCard()">
+                                                                                <i class="fas fa-plus"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                        <div class="card-body">
+                                                                            <div id="optional-cards-list">
+                                                                                <!-- Optional cards will be populated -->
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="mt-3">
+                                                                <h6>阵营关系要求</h6>
+                                                                <div class="row">
+                                                                    <div class="col-md-2">
+                                                                        <label class="form-label">苏丹王</label>
+                                                                        <input type="number" class="form-control" id="faction-sultan" min="-100" max="100">
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <label class="form-label">大臣阵营</label>
+                                                                        <input type="number" class="form-control" id="faction-minister" min="-100" max="100">
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <label class="form-label">将军阵营</label>
+                                                                        <input type="number" class="form-control" id="faction-military" min="-100" max="100">
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <label class="form-label">黑鸭会</label>
+                                                                        <input type="number" class="form-control" id="faction-blackduck" min="-100" max="100">
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <label class="form-label">平民阵营</label>
+                                                                        <input type="number" class="form-control" id="faction-commoner" min="-100" max="100">
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <label class="form-label">学者阵营</label>
+                                                                        <input type="number" class="form-control" id="faction-scholar" min="-100" max="100">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="mt-3">
+                                                                <button type="submit" class="btn btn-primary">
+                                                                    <i class="fas fa-save"></i> 保存条件
+                                                                </button>
+                                                                <button type="button" class="btn btn-outline-secondary" onclick="resetEntryConditionForm()">
+                                                                    <i class="fas fa-undo"></i> 重置
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scene Dynamic Events Tab -->
+                        <div class="tab-pane fade" id="scene-dynamic-events">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-bolt"></i> 动态事件管理</h5>
+                                    <button class="btn btn-sm btn-primary float-end" onclick="openDynamicEventModal()">
+                                        <i class="fas fa-plus"></i> 新建事件
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>事件ID</th>
+                                                    <th>事件名称</th>
+                                                    <th>所属场景</th>
+                                                    <th>触发类型</th>
+                                                    <th>触发条件</th>
+                                                    <th>触发概率</th>
+                                                    <th>最大触发次数</th>
+                                                    <th>当前触发次数</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="dynamic-events-table-body">
+                                                <!-- Dynamic events will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scene Rewards Tab -->
+                        <div class="tab-pane fade" id="scene-rewards">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-trophy"></i> 奖励配置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>成功奖励</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">属性点</label>
+                                                        <input type="number" class="form-control" id="success-attribute-points" min="0" max="100">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">经验值</label>
+                                                        <input type="number" class="form-control" id="success-experience" min="0" max="1000">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">声望值</label>
+                                                        <input type="number" class="form-control" id="success-reputation" min="0" max="50">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">金币</label>
+                                                        <input type="number" class="form-control" id="success-gold" min="0" max="1000">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>失败惩罚</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">声望损失</label>
+                                                        <input type="number" class="form-control" id="failure-reputation" min="-50" max="0">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">阵营关系影响</label>
+                                                        <div id="failure-faction-relations">
+                                                            <!-- Faction relation penalties will be populated -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>完美通关奖励</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">完美条件</label>
+                                                        <select class="form-select" id="perfect-bonus-condition">
+                                                            <option value="no_combat">无战斗通关</option>
+                                                            <option value="minimal_rounds">最少轮数通关</option>
+                                                            <option value="high_approval">高好感度通关</option>
+                                                            <option value="special_choice">特殊选择通关</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">额外奖励</label>
+                                                        <input type="text" class="form-control" id="perfect-bonus-reward" placeholder="描述额外奖励">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scene NPC Configuration Tab -->
+                        <div class="tab-pane fade" id="scene-npc-config">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-users-cog"></i> 场景NPC配置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>NPC名称</th>
+                                                    <th>所属场景</th>
+                                                    <th>角色定位</th>
+                                                    <th>初始位置</th>
+                                                    <th>发言优先级</th>
+                                                    <th>特殊行为</th>
+                                                    <th>可挑战</th>
+                                                    <th>可转化</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="scene-npc-config-table-body">
+                                                <!-- Scene NPC configurations will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NPC Management Section -->
+                <div id="npcs" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">NPC管理系统</h1>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="openNPCModal()">
+                                <i class="fas fa-plus"></i> 新建NPC
+                            </button>
+                            <button class="btn btn-outline-info" onclick="openNPCTemplate()">
+                                <i class="fas fa-copy"></i> 模板管理
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="bulkNPCOperations()">
+                                <i class="fas fa-tasks"></i> 批量操作
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- NPC Type Tabs -->
+                    <ul class="nav nav-tabs mb-4" id="npc-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#game-npcs">场景NPC</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#player-npcs">玩家NPC</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#npc-attributes">属性管理</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#npc-conversion">转化系统</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#npc-ai">AI配置</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- Game NPCs Tab -->
+                        <div class="tab-pane fade show active" id="game-npcs">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" id="npc-search" placeholder="搜索NPC...">
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="npc-faction-filter">
+                                        <option value="">所有阵营</option>
+                                        <option value="sultan">苏丹王</option>
+                                        <option value="minister">大臣阵营</option>
+                                        <option value="military">将军阵营</option>
+                                        <option value="blackduck">黑鸭会</option>
+                                        <option value="commoner">平民阵营</option>
+                                        <option value="scholar">学者阵营</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="npc-tier-filter">
+                                        <option value="">所有等级</option>
+                                        <option value="bronze">青铜</option>
+                                        <option value="silver">白银</option>
+                                        <option value="gold">黄金</option>
+                                        <option value="legendary">传说</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="npc-category-filter">
+                                        <option value="">所有类别</option>
+                                        <option value="0">平民</option>
+                                        <option value="1">贵族</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="npc-killable-filter">
+                                        <option value="">可击杀性</option>
+                                        <option value="true">可击杀</option>
+                                        <option value="false">不可击杀</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <button class="btn btn-outline-primary w-100" onclick="filterNPCs()">
+                                        <i class="fas fa-filter"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="row" id="npc-cards-container">
+                                <!-- NPC cards will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Player NPCs Tab -->
+                        <div class="tab-pane fade" id="player-npcs">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-user-friends"></i> 玩家拥有的NPC</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>NPC名称</th>
+                                                    <th>拥有者</th>
+                                                    <th>阵营</th>
+                                                    <th>等级</th>
+                                                    <th>当前属性</th>
+                                                    <th>获得方式</th>
+                                                    <th>状态</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="player-npcs-table-body">
+                                                <!-- Player NPC rows will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NPC Attributes Tab -->
+                        <div class="tab-pane fade" id="npc-attributes">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-chart-radar"></i> 属性分布分析</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="attribute-distribution-chart"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-balance-scale"></i> 属性平衡检查</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="attribute-balance-report"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NPC Conversion System Tab -->
+                        <div class="tab-pane fade" id="npc-conversion">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-exchange-alt"></i> NPC转化系统</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>可转化NPC列表</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>NPC名称</th>
+                                                                    <th>阵营</th>
+                                                                    <th>转化成本</th>
+                                                                    <th>成功率</th>
+                                                                    <th>操作</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="convertible-npcs-table">
+                                                                <!-- Convertible NPCs will be populated here -->
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>转化条件配置</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <form id="conversion-config-form">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">选择NPC</label>
+                                                            <select class="form-select" id="conversion-npc-select">
+                                                                <option value="">请选择NPC</option>
+                                                                <!-- NPC options will be populated -->
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">转化成本</label>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <input type="number" class="form-control" id="conversion-gold-cost" placeholder="金币" min="0">
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <input type="number" class="form-control" id="conversion-reputation-cost" placeholder="声望" min="0">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">转化要求</label>
+                                                            <div class="row">
+                                                                <div class="col-4">
+                                                                    <input type="number" class="form-control" id="conversion-loyalty-min" placeholder="忠诚度" min="0" max="100">
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <input type="number" class="form-control" id="conversion-fear-min" placeholder="恐惧值" min="0" max="100">
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <input type="number" class="form-control" id="conversion-relationship-min" placeholder="关系值" min="0" max="100">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">成功率基数</label>
+                                                            <input type="number" class="form-control" id="conversion-base-success-rate" min="0" max="100" step="0.1">
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">转化后属性保留率</label>
+                                                            <div class="row">
+                                                                <div class="col-3">
+                                                                    <label class="form-label">智力</label>
+                                                                    <input type="number" class="form-control" id="conversion-int-retention" min="0" max="100" step="1" value="100">
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <label class="form-label">武力</label>
+                                                                    <input type="number" class="form-control" id="conversion-str-retention" min="0" max="100" step="1" value="90">
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <label class="form-label">防御</label>
+                                                                    <input type="number" class="form-control" id="conversion-def-retention" min="0" max="100" step="1" value="90">
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <label class="form-label">魅力</label>
+                                                                    <input type="number" class="form-control" id="conversion-cha-retention" min="0" max="100" step="1" value="95">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">转化后特殊能力</label>
+                                                            <textarea class="form-control" id="conversion-special-abilities" rows="3" placeholder="描述转化后获得的特殊能力"></textarea>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="conversion-keep-memories">
+                                                                <label class="form-check-label" for="conversion-keep-memories">
+                                                                    保留记忆和性格
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="fas fa-save"></i> 保存转化配置
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-warning" onclick="testConversion()">
+                                                            <i class="fas fa-vial"></i> 测试转化
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NPC AI Configuration Tab -->
+                        <div class="tab-pane fade" id="npc-ai">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-robot"></i> NPC AI行为配置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="list-group" id="npc-ai-list">
+                                                <!-- NPC AI configs will be populated here -->
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div id="npc-ai-config-editor">
+                                                <!-- AI config editor will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card System Management Section -->
+                <div id="cards" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">卡片系统管理</h1>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="openCardModal()">
+                                <i class="fas fa-plus"></i> 新建卡片
+                            </button>
+                            <button class="btn btn-outline-info" onclick="openCardSetModal()">
+                                <i class="fas fa-layer-group"></i> 套装管理
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="balanceCheck()">
+                                <i class="fas fa-balance-scale"></i> 平衡检查
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card Tabs -->
+                    <ul class="nav nav-tabs mb-4" id="card-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#all-cards">所有卡片</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#card-effects">效果管理</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#card-sets">套装系统</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#card-synergy">联动效果</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#card-balance">平衡标准</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- All Cards Tab -->
+                        <div class="tab-pane fade show active" id="all-cards">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" id="card-search" placeholder="搜索卡片...">
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="card-rarity-filter">
+                                        <option value="">所有稀有度</option>
+                                        <option value="common">普通</option>
+                                        <option value="rare">稀有</option>
+                                        <option value="epic">史诗</option>
+                                        <option value="legendary">传说</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="card-type-filter">
+                                        <option value="">所有类型</option>
+                                        <option value="pass">通行证类</option>
+                                        <option value="attribute">属性增强类</option>
+                                        <option value="judgment">影响判定类</option>
+                                        <option value="special">特殊功能类</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="card-faction-filter">
+                                        <option value="">所有阵营</option>
+                                        <option value="sultan">苏丹王</option>
+                                        <option value="minister">大臣阵营</option>
+                                        <option value="military">将军阵营</option>
+                                        <option value="blackduck">黑鸭会</option>
+                                        <option value="commoner">平民阵营</option>
+                                        <option value="scholar">学者阵营</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="card-status-filter">
+                                        <option value="">所有状态</option>
+                                        <option value="active">激活</option>
+                                        <option value="inactive">禁用</option>
+                                        <option value="testing">测试中</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <button class="btn btn-outline-primary w-100" onclick="filterCards()">
+                                        <i class="fas fa-filter"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="row" id="cards-container">
+                                <!-- Card items will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Card Effects Tab -->
+                        <div class="tab-pane fade" id="card-effects">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-magic"></i> 卡片效果配置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>立即效果</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="immediate-effects-list"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>持续效果</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="duration-effects-list"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>永久效果</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="permanent-effects-list"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Sets Tab -->
+                        <div class="tab-pane fade" id="card-sets">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-layer-group"></i> 卡片套装系统</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="card-sets-container">
+                                        <!-- Card sets will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Synergy Tab -->
+                        <div class="tab-pane fade" id="card-synergy">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-link"></i> 卡片联动效果管理</h5>
+                                    <button class="btn btn-sm btn-primary float-end" onclick="openSynergyModal()">
+                                        <i class="fas fa-plus"></i> 新建联动
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>联动效果列表</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="list-group" id="synergy-list">
+                                                        <!-- Synergy list will be populated here -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>联动效果配置</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <form id="synergy-form">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">联动名称</label>
+                                                            <input type="text" class="form-control" id="synergy-name" placeholder="输入联动效果名称">
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">联动ID</label>
+                                                            <input type="text" class="form-control" id="synergy-id" placeholder="输入唯一标识ID">
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">联动类型</label>
+                                                            <select class="form-select" id="synergy-type">
+                                                                <option value="">选择联动类型</option>
+                                                                <option value="enhancement">效果增强</option>
+                                                                <option value="new_ability">新能力解锁</option>
+                                                                <option value="cost_reduction">成本降低</option>
+                                                                <option value="condition_bypass">条件绕过</option>
+                                                                <option value="attribute_multiplier">属性倍增</option>
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">需要的卡片</label>
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <select class="form-select" id="required-card-select">
+                                                                        <option value="">选择卡片</option>
+                                                                        <!-- Card options will be populated -->
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <button type="button" class="btn btn-outline-primary" onclick="addRequiredCardToSynergy()">
+                                                                        <i class="fas fa-plus"></i> 添加
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mt-2">
+                                                                <div id="required-cards-for-synergy">
+                                                                    <!-- Required cards will be displayed here -->
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">联动效果描述</label>
+                                                            <textarea class="form-control" id="synergy-description" rows="3" placeholder="详细描述联动效果"></textarea>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">联动效果配置</label>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">效果值</label>
+                                                                    <input type="number" class="form-control" id="synergy-effect-value" step="0.1" placeholder="效果数值">
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">效果目标</label>
+                                                                    <select class="form-select" id="synergy-effect-target">
+                                                                        <option value="">选择目标</option>
+                                                                        <option value="all_cards">所有卡片</option>
+                                                                        <option value="same_type">同类型卡片</option>
+                                                                        <option value="specific_card">特定卡片</option>
+                                                                        <option value="player">玩家</option>
+                                                                        <option value="npcs">所有NPC</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">激活条件</label>
+                                                            <div class="row">
+                                                                <div class="col-md-4">
+                                                                    <label class="form-label">最小卡片数</label>
+                                                                    <input type="number" class="form-control" id="synergy-min-cards" min="2" max="10" value="2">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <label class="form-label">同时使用</label>
+                                                                    <select class="form-select" id="synergy-simultaneous">
+                                                                        <option value="false">可分别使用</option>
+                                                                        <option value="true">必须同时使用</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <label class="form-label">场景限制</label>
+                                                                    <select class="form-select" id="synergy-scene-limit">
+                                                                        <option value="any">任何场景</option>
+                                                                        <option value="same_scene">同一场景</option>
+                                                                        <option value="specific_scene">特定场景</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">联动效果公式</label>
+                                                            <textarea class="form-control" id="synergy-formula" rows="2" placeholder="输入效果计算公式（可选）"></textarea>
+                                                            <small class="form-text text-muted">
+                                                                可用变量: {card_count}, {player_level}, {npc_attributes}, {scene_context}
+                                                            </small>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">优先级</label>
+                                                                    <input type="number" class="form-control" id="synergy-priority" min="0" max="100" value="50">
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">冷却时间</label>
+                                                                    <input type="number" class="form-control" id="synergy-cooldown" min="0" placeholder="回合数">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="synergy-is-active">
+                                                                <label class="form-check-label" for="synergy-is-active">
+                                                                    激活联动效果
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="d-flex justify-content-between">
+                                                            <div>
+                                                                <button type="submit" class="btn btn-primary">
+                                                                    <i class="fas fa-save"></i> 保存联动
+                                                                </button>
+                                                                <button type="button" class="btn btn-outline-secondary" onclick="resetSynergyForm()">
+                                                                    <i class="fas fa-undo"></i> 重置
+                                                                </button>
+                                                            </div>
+                                                            <div>
+                                                                <button type="button" class="btn btn-outline-warning" onclick="testSynergy()">
+                                                                    <i class="fas fa-vial"></i> 测试联动
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mt-4">
+                                        <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>联动效果统计</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>联动名称</th>
+                                                                    <th>需要卡片</th>
+                                                                    <th>激活次数</th>
+                                                                    <th>成功率</th>
+                                                                    <th>平均效果值</th>
+                                                                    <th>最后激活时间</th>
+                                                                    <th>状态</th>
+                                                                    <th>操作</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="synergy-stats-table">
+                                                                <!-- Synergy statistics will be populated here -->
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Balance Tab -->
+                        <div class="tab-pane fade" id="card-balance">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-balance-scale"></i> 平衡标准管理</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>稀有度平衡标准</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="rarity-balance-standards"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>平衡检查报告</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="balance-check-report"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Configuration Section -->
+                <div id="ai-configs" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">AI配置管理</h1>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="openAIConfigModal()">
+                                <i class="fas fa-plus"></i> 新建AI配置
+                            </button>
+                            <button class="btn btn-outline-info" onclick="testAIConfig()">
+                                <i class="fas fa-vial"></i> 测试AI
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="exportAIConfigs()">
+                                <i class="fas fa-download"></i> 导出配置
+                            </button>
+                        </div>
+                    </div>
+
+                    <ul class="nav nav-tabs mb-4" id="ai-config-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#ai-config-list">配置列表</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#ai-response-history">响应历史</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#ai-performance-monitor">性能监控</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#ai-scene-specific">场景特定配置</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- AI Config List Tab -->
+                        <div class="tab-pane fade show active" id="ai-config-list">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-list"></i> AI配置列表</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="list-group" id="ai-configs-list">
+                                                <!-- AI configs will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-edit"></i> AI配置编辑器</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form id="ai-config-form">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">配置ID</label>
+                                                            <input type="text" class="form-control" id="ai-config-id" placeholder="输入唯一配置ID">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">配置名称</label>
+                                                            <input type="text" class="form-control" id="ai-config-name" placeholder="输入配置名称">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">AI类型</label>
+                                                            <select class="form-select" id="ai-type-select">
+                                                                <option value="">选择AI类型</option>
+                                                                <option value="narrator">旁白AI</option>
+                                                                <option value="npc">NPC AI</option>
+                                                                <option value="evaluator">评分AI</option>
+                                                                <option value="option_generator">选项生成AI</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">版本</label>
+                                                            <input type="text" class="form-control" id="ai-config-version" placeholder="版本号">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">模型配置</label>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <input type="number" class="form-control" id="ai-temperature" placeholder="Temperature" step="0.1" min="0" max="2" value="0.7">
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <input type="number" class="form-control" id="ai-max-tokens" placeholder="Max Tokens" min="1" max="4096" value="1024">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">创建者</label>
+                                                            <input type="text" class="form-control" id="ai-config-creator" placeholder="创建者">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="ai-config-active">
+                                                                <label class="form-check-label" for="ai-config-active">
+                                                                    激活配置
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">基础Prompt</label>
+                                                    <textarea class="form-control" id="ai-base-prompt" rows="4" placeholder="输入基础prompt模板"></textarea>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">系统Prompt</label>
+                                                    <textarea class="form-control" id="ai-system-prompt" rows="3" placeholder="输入系统prompt"></textarea>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">角色设定配置（NPC AI专用）</label>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">性格</label>
+                                                            <select class="form-select" id="ai-personality">
+                                                                <option value="">选择性格</option>
+                                                                <option value="aggressive">激进</option>
+                                                                <option value="diplomatic">外交</option>
+                                                                <option value="cunning">狡猾</option>
+                                                                <option value="loyal">忠诚</option>
+                                                                <option value="treacherous">背叛</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">说话风格</label>
+                                                            <select class="form-select" id="ai-speech-style">
+                                                                <option value="">选择风格</option>
+                                                                <option value="formal">正式</option>
+                                                                <option value="casual">随意</option>
+                                                                <option value="poetic">诗意</option>
+                                                                <option value="military">军事</option>
+                                                                <option value="scholarly">学者</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">情绪阈值</label>
+                                                            <input type="number" class="form-control" id="ai-emotion-threshold" min="0" max="100" value="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">评分配置（评分AI专用）</label>
+                                                    <div class="row">
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">故事进度权重</label>
+                                                            <input type="number" class="form-control" id="ai-story-weight" min="0" max="1" step="0.1" value="0.4">
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">对话质量权重</label>
+                                                            <input type="number" class="form-control" id="ai-dialogue-weight" min="0" max="1" step="0.1" value="0.3">
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">紧张度权重</label>
+                                                            <input type="number" class="form-control" id="ai-tension-weight" min="0" max="1" step="0.1" value="0.3">
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">触发阈值</label>
+                                                            <input type="number" class="form-control" id="ai-trigger-threshold" min="0" max="100" value="75">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">生成配置（选项生成AI专用）</label>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">选项生成风格</label>
+                                                            <select class="form-select" id="ai-option-style">
+                                                                <option value="">选择风格</option>
+                                                                <option value="diplomatic">外交风格</option>
+                                                                <option value="aggressive">激进风格</option>
+                                                                <option value="clever">机智风格</option>
+                                                                <option value="balanced">平衡风格</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">效果值范围</label>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <input type="number" class="form-control" id="ai-effect-min" placeholder="最小值" min="-10" max="10" value="-5">
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <input type="number" class="form-control" id="ai-effect-max" placeholder="最大值" min="-10" max="10" value="5">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">选项数量</label>
+                                                            <input type="number" class="form-control" id="ai-option-count" min="2" max="6" value="3">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">旁白配置（旁白AI专用）</label>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">描述风格</label>
+                                                            <select class="form-select" id="ai-narration-style">
+                                                                <option value="">选择风格</option>
+                                                                <option value="political_intrigue">政治阴谋</option>
+                                                                <option value="military_tension">军事紧张</option>
+                                                                <option value="courtly_drama">宫廷戏剧</option>
+                                                                <option value="epic_fantasy">史诗奇幻</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">触发频率</label>
+                                                            <input type="number" class="form-control" id="ai-narration-frequency" min="1" max="10" value="3">
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">详细程度</label>
+                                                            <select class="form-select" id="ai-narration-detail">
+                                                                <option value="brief">简洁</option>
+                                                                <option value="moderate">适中</option>
+                                                                <option value="detailed">详细</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="fas fa-save"></i> 保存配置
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="resetAIConfigForm()">
+                                                            <i class="fas fa-undo"></i> 重置
+                                                        </button>
+                                                    </div>
+                                                    <div>
+                                                        <button type="button" class="btn btn-outline-warning" onclick="testAIConfig()">
+                                                            <i class="fas fa-vial"></i> 测试AI
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-info" onclick="duplicateAIConfig()">
+                                                            <i class="fas fa-copy"></i> 复制配置
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Response History Tab -->
+                        <div class="tab-pane fade" id="ai-response-history">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-history"></i> AI响应历史</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="response-history-ai-filter">
+                                                <option value="">所有AI配置</option>
+                                                <!-- AI config options will be populated -->
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="date" class="form-control" id="response-history-date-filter">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="response-history-type-filter">
+                                                <option value="">所有类型</option>
+                                                <option value="narrator">旁白</option>
+                                                <option value="npc">NPC对话</option>
+                                                <option value="evaluator">评分</option>
+                                                <option value="option_generator">选项生成</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button class="btn btn-outline-primary" onclick="filterResponseHistory()">
+                                                <i class="fas fa-filter"></i> 筛选
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>时间</th>
+                                                    <th>AI配置</th>
+                                                    <th>类型</th>
+                                                    <th>请求内容</th>
+                                                    <th>响应长度</th>
+                                                    <th>响应时间</th>
+                                                    <th>Token使用</th>
+                                                    <th>状态</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="response-history-table">
+                                                <!-- Response history will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Performance Monitor Tab -->
+                        <div class="tab-pane fade" id="ai-performance-monitor">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-chart-line"></i> 性能指标</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="card">
+                                                        <div class="card-body text-center">
+                                                            <h5>平均响应时间</h5>
+                                                            <h3 class="text-primary" id="avg-response-time">0ms</h3>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card">
+                                                        <div class="card-body text-center">
+                                                            <h5>成功率</h5>
+                                                            <h3 class="text-success" id="success-rate">0%</h3>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-3">
+                                                <div class="col-md-6">
+                                                    <div class="card">
+                                                        <div class="card-body text-center">
+                                                            <h5>总Token使用</h5>
+                                                            <h3 class="text-info" id="total-tokens">0</h3>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card">
+                                                        <div class="card-body text-center">
+                                                            <h5>总响应数</h5>
+                                                            <h3 class="text-warning" id="total-responses">0</h3>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-exclamation-triangle"></i> 错误统计</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="error-statistics">
+                                                <!-- Error statistics will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Scene Specific Config Tab -->
+                        <div class="tab-pane fade" id="ai-scene-specific">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-cogs"></i> 场景特定AI配置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>场景名称</th>
+                                                    <th>AI配置</th>
+                                                    <th>执行顺序</th>
+                                                    <th>是否必需</th>
+                                                    <th>触发条件</th>
+                                                    <th>特定配置</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="scene-ai-config-table">
+                                                <!-- Scene AI configurations will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Player Management Section -->
+                <div id="players" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">玩家管理</h1>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="openPlayerModal()">
+                                <i class="fas fa-plus"></i> 新建玩家
+                            </button>
+                            <button class="btn btn-outline-info" onclick="playerStatistics()">
+                                <i class="fas fa-chart-line"></i> 玩家统计
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="resetPlayerData()">
+                                <i class="fas fa-refresh"></i> 重置数据
+                            </button>
+                        </div>
+                    </div>
+
+                    <ul class="nav nav-tabs mb-4" id="player-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#player-list">玩家列表</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#player-attributes">属性管理</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#player-progress">进度跟踪</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#attribute-points">属性点管理</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- Player List Tab -->
+                        <div class="tab-pane fade show active" id="player-list">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-users"></i> 玩家列表</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>玩家ID</th>
+                                                    <th>玩家名称</th>
+                                                    <th>当前场景</th>
+                                                    <th>游戏进度</th>
+                                                    <th>拥有NPC</th>
+                                                    <th>卡片数量</th>
+                                                    <th>属性点</th>
+                                                    <th>最后活跃</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="players-table-body">
+                                                <!-- Player rows will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Player Attributes Tab -->
+                        <div class="tab-pane fade" id="player-attributes">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-user-cog"></i> 属性编辑器</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="player-attribute-editor">
+                                                <!-- Player attribute editor will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-history"></i> 属性变更历史</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="attribute-history">
+                                                <!-- Attribute history will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Player Progress Tab -->
+                        <div class="tab-pane fade" id="player-progress">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-chart-line"></i> 玩家进度分析</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="player-progress-charts">
+                                        <!-- Progress charts will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Attribute Points Tab -->
+                        <div class="tab-pane fade" id="attribute-points">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-coins"></i> 属性点池管理</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>玩家属性点池</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="list-group" id="player-attribute-pools">
+                                                        <!-- Player attribute pools will be populated here -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>属性点分配界面</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <form id="attribute-allocation-form">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">选择玩家</label>
+                                                            <select class="form-select" id="allocation-player-select">
+                                                                <option value="">请选择玩家</option>
+                                                                <!-- Player options will be populated -->
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">选择目标NPC</label>
+                                                            <select class="form-select" id="allocation-npc-select">
+                                                                <option value="">请选择NPC</option>
+                                                                <!-- Player NPC options will be populated -->
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="card">
+                                                                    <div class="card-header">
+                                                                        <h6>可用属性点 <span id="available-points" class="badge bg-primary">0</span></h6>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <div id="available-points-breakdown">
+                                                                            <!-- Available points breakdown will be populated -->
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="card">
+                                                                    <div class="card-header">
+                                                                        <h6>当前NPC属性</h6>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <div id="current-npc-attributes">
+                                                                            <!-- Current NPC attributes will be populated -->
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="mt-3">
+                                                            <h6>属性点分配</h6>
+                                                            <div class="row">
+                                                                <div class="col-md-3">
+                                                                    <div class="card">
+                                                                        <div class="card-body text-center">
+                                                                            <h6>智力 (INT)</h6>
+                                                                            <div class="d-flex align-items-center justify-content-center">
+                                                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="adjustAttribute('intelligence', -1)">-</button>
+                                                                                <span class="mx-3">
+                                                                                    <input type="number" class="form-control text-center" id="int-allocation" value="0" min="0" max="20" style="width: 60px;">
+                                                                                </span>
+                                                                                <button type="button" class="btn btn-sm btn-outline-success" onclick="adjustAttribute('intelligence', 1)">+</button>
+                                                                            </div>
+                                                                            <small class="text-muted">范围: 1-20</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="card">
+                                                                        <div class="card-body text-center">
+                                                                            <h6>武力 (STR)</h6>
+                                                                            <div class="d-flex align-items-center justify-content-center">
+                                                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="adjustAttribute('strength', -1)">-</button>
+                                                                                <span class="mx-3">
+                                                                                    <input type="number" class="form-control text-center" id="str-allocation" value="0" min="0" max="100" style="width: 60px;">
+                                                                                </span>
+                                                                                <button type="button" class="btn btn-sm btn-outline-success" onclick="adjustAttribute('strength', 1)">+</button>
+                                                                            </div>
+                                                                            <small class="text-muted">范围: 1-100</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="card">
+                                                                        <div class="card-body text-center">
+                                                                            <h6>防御 (DEF)</h6>
+                                                                            <div class="d-flex align-items-center justify-content-center">
+                                                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="adjustAttribute('defense', -1)">-</button>
+                                                                                <span class="mx-3">
+                                                                                    <input type="number" class="form-control text-center" id="def-allocation" value="0" min="0" max="100" style="width: 60px;">
+                                                                                </span>
+                                                                                <button type="button" class="btn btn-sm btn-outline-success" onclick="adjustAttribute('defense', 1)">+</button>
+                                                                            </div>
+                                                                            <small class="text-muted">范围: 1-100</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="card">
+                                                                        <div class="card-body text-center">
+                                                                            <h6>魅力 (CHA)</h6>
+                                                                            <div class="d-flex align-items-center justify-content-center">
+                                                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="adjustAttribute('charisma', -1)">-</button>
+                                                                                <span class="mx-3">
+                                                                                    <input type="number" class="form-control text-center" id="cha-allocation" value="0" min="0" max="100" style="width: 60px;">
+                                                                                </span>
+                                                                                <button type="button" class="btn btn-sm btn-outline-success" onclick="adjustAttribute('charisma', 1)">+</button>
+                                                                            </div>
+                                                                            <small class="text-muted">范围: 1-100</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="row mt-3">
+                                                                <div class="col-md-3">
+                                                                    <div class="card">
+                                                                        <div class="card-body text-center">
+                                                                            <h6>影响力 (INF)</h6>
+                                                                            <div class="d-flex align-items-center justify-content-center">
+                                                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="adjustAttribute('influence', -1)">-</button>
+                                                                                <span class="mx-3">
+                                                                                    <input type="number" class="form-control text-center" id="inf-allocation" value="0" min="0" max="100" style="width: 60px;">
+                                                                                </span>
+                                                                                <button type="button" class="btn btn-sm btn-outline-success" onclick="adjustAttribute('influence', 1)">+</button>
+                                                                            </div>
+                                                                            <small class="text-muted">范围: 1-100</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="card">
+                                                                        <div class="card-body text-center">
+                                                                            <h6>指挥 (CMD)</h6>
+                                                                            <div class="d-flex align-items-center justify-content-center">
+                                                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="adjustAttribute('command', -1)">-</button>
+                                                                                <span class="mx-3">
+                                                                                    <input type="number" class="form-control text-center" id="cmd-allocation" value="0" min="0" max="100" style="width: 60px;">
+                                                                                </span>
+                                                                                <button type="button" class="btn btn-sm btn-outline-success" onclick="adjustAttribute('command', 1)">+</button>
+                                                                            </div>
+                                                                            <small class="text-muted">范围: 1-100</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="card">
+                                                                        <div class="card-body text-center">
+                                                                            <h6>生命值 (HP)</h6>
+                                                                            <div class="d-flex align-items-center justify-content-center">
+                                                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="adjustAttribute('hp_max', -1)">-</button>
+                                                                                <span class="mx-3">
+                                                                                    <input type="number" class="form-control text-center" id="hp-allocation" value="0" min="0" max="500" style="width: 60px;">
+                                                                                </span>
+                                                                                <button type="button" class="btn btn-sm btn-outline-success" onclick="adjustAttribute('hp_max', 1)">+</button>
+                                                                            </div>
+                                                                            <small class="text-muted">范围: 1-500</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="card">
+                                                                        <div class="card-body text-center">
+                                                                            <h6>已分配总点数</h6>
+                                                                            <div class="display-6 text-primary" id="total-allocated">0</div>
+                                                                            <small class="text-muted">剩余: <span id="remaining-points">0</span></small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="mt-3">
+                                                            <div class="d-flex justify-content-between">
+                                                                <div>
+                                                                    <button type="submit" class="btn btn-primary">
+                                                                        <i class="fas fa-save"></i> 确认分配
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-outline-secondary" onclick="resetAllocation()">
+                                                                        <i class="fas fa-undo"></i> 重置
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-outline-info" onclick="previewAllocation()">
+                                                                        <i class="fas fa-eye"></i> 预览效果
+                                                                    </button>
+                                                                </div>
+                                                                <div>
+                                                                    <button type="button" class="btn btn-outline-success" onclick="optimalAllocation()">
+                                                                        <i class="fas fa-magic"></i> 智能分配
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mt-4">
+                                        <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6>属性点分配历史</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>时间</th>
+                                                                    <th>玩家</th>
+                                                                    <th>目标NPC</th>
+                                                                    <th>属性</th>
+                                                                    <th>分配点数</th>
+                                                                    <th>获得来源</th>
+                                                                    <th>操作</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="allocation-history-table">
+                                                                <!-- Allocation history will be populated here -->
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Faction Management Section -->
+                <div id="factions" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">阵营管理</h1>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="openFactionModal()">
+                                <i class="fas fa-plus"></i> 新建阵营关系
+                            </button>
+                            <button class="btn btn-outline-info" onclick="factionAnalysis()">
+                                <i class="fas fa-chart-network"></i> 关系分析
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="resetFactionRelations()">
+                                <i class="fas fa-refresh"></i> 重置关系
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-network-wired"></i> 六大阵营关系网络</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="faction-network-chart" style="height: 400px;">
+                                        <!-- Faction network visualization will be here -->
+                                        <div class="text-center">
+                                            <svg width="800" height="400" id="faction-network-svg">
+                                                <!-- Faction nodes -->
+                                                <g id="faction-nodes">
+                                                    <!-- Sultan -->
+                                                    <circle cx="400" cy="100" r="50" fill="#ffd700" stroke="#000" stroke-width="2" id="sultan-node"/>
+                                                    <text x="400" y="105" text-anchor="middle" font-weight="bold">苏丹王</text>
+                                                    
+                                                    <!-- Minister -->
+                                                    <circle cx="200" cy="200" r="40" fill="#8b5cf6" stroke="#000" stroke-width="2" id="minister-node"/>
+                                                    <text x="200" y="205" text-anchor="middle" font-weight="bold">大臣</text>
+                                                    
+                                                    <!-- Military -->
+                                                    <circle cx="600" cy="200" r="40" fill="#ef4444" stroke="#000" stroke-width="2" id="military-node"/>
+                                                    <text x="600" y="205" text-anchor="middle" font-weight="bold">将军</text>
+                                                    
+                                                    <!-- BlackDuck -->
+                                                    <circle cx="100" cy="320" r="35" fill="#374151" stroke="#000" stroke-width="2" id="blackduck-node"/>
+                                                    <text x="100" y="325" text-anchor="middle" font-weight="bold" fill="white">黑鸭会</text>
+                                                    
+                                                    <!-- Commoner -->
+                                                    <circle cx="400" cy="320" r="35" fill="#10b981" stroke="#000" stroke-width="2" id="commoner-node"/>
+                                                    <text x="400" y="325" text-anchor="middle" font-weight="bold">平民</text>
+                                                    
+                                                    <!-- Scholar -->
+                                                    <circle cx="700" cy="320" r="35" fill="#3b82f6" stroke="#000" stroke-width="2" id="scholar-node"/>
+                                                    <text x="700" y="325" text-anchor="middle" font-weight="bold">学者</text>
+                                                </g>
+                                                
+                                                <!-- Relationship lines -->
+                                                <g id="faction-relationships">
+                                                    <!-- Lines will be dynamically updated based on relationship values -->
+                                                </g>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-table"></i> 阵营关系矩阵</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered text-center">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>苏丹王</th>
+                                                    <th>大臣</th>
+                                                    <th>将军</th>
+                                                    <th>黑鸭会</th>
+                                                    <th>平民</th>
+                                                    <th>学者</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="faction-relation-matrix-body">
+                                                <tr>
+                                                    <th>苏丹王</th>
+                                                    <td>-</td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="sultan-minister" min="-100" max="100" value="80"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="sultan-military" min="-100" max="100" value="70"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="sultan-blackduck" min="-100" max="100" value="-20"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="sultan-commoner" min="-100" max="100" value="40"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="sultan-scholar" min="-100" max="100" value="60"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>大臣</th>
+                                                    <td><input type="number" class="form-control form-control-sm" id="minister-sultan" min="-100" max="100" value="80"></td>
+                                                    <td>-</td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="minister-military" min="-100" max="100" value="10"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="minister-blackduck" min="-100" max="100" value="-50"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="minister-commoner" min="-100" max="100" value="30"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="minister-scholar" min="-100" max="100" value="70"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>将军</th>
+                                                    <td><input type="number" class="form-control form-control-sm" id="military-sultan" min="-100" max="100" value="70"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="military-minister" min="-100" max="100" value="10"></td>
+                                                    <td>-</td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="military-blackduck" min="-100" max="100" value="-30"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="military-commoner" min="-100" max="100" value="20"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="military-scholar" min="-100" max="100" value="50"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>黑鸭会</th>
+                                                    <td><input type="number" class="form-control form-control-sm" id="blackduck-sultan" min="-100" max="100" value="-20"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="blackduck-minister" min="-100" max="100" value="-50"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="blackduck-military" min="-100" max="100" value="-30"></td>
+                                                    <td>-</td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="blackduck-commoner" min="-100" max="100" value="60"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="blackduck-scholar" min="-100" max="100" value="-10"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>平民</th>
+                                                    <td><input type="number" class="form-control form-control-sm" id="commoner-sultan" min="-100" max="100" value="40"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="commoner-minister" min="-100" max="100" value="30"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="commoner-military" min="-100" max="100" value="20"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="commoner-blackduck" min="-100" max="100" value="60"></td>
+                                                    <td>-</td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="commoner-scholar" min="-100" max="100" value="80"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>学者</th>
+                                                    <td><input type="number" class="form-control form-control-sm" id="scholar-sultan" min="-100" max="100" value="60"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="scholar-minister" min="-100" max="100" value="70"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="scholar-military" min="-100" max="100" value="50"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="scholar-blackduck" min="-100" max="100" value="-10"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" id="scholar-commoner" min="-100" max="100" value="80"></td>
+                                                    <td>-</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div class="mt-3">
+                                            <button class="btn btn-primary" onclick="saveFactionsRelations()">
+                                                <i class="fas fa-save"></i> 保存关系矩阵
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="resetFactionsRelations()">
+                                                <i class="fas fa-undo"></i> 重置为默认
+                                            </button>
+                                            <button class="btn btn-outline-info" onclick="updateNetworkVisualization()">
+                                                <i class="fas fa-sync"></i> 更新网络图
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-chart-pie"></i> 阵营力量分布</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">阵营力量配置</label>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="form-label">苏丹王</label>
+                                                    <input type="range" class="form-range" id="sultan-power" min="0" max="100" value="90">
+                                                    <span id="sultan-power-value">90</span>%
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label class="form-label">大臣阵营</label>
+                                                    <input type="range" class="form-range" id="minister-power" min="0" max="100" value="75">
+                                                    <span id="minister-power-value">75</span>%
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label class="form-label">将军阵营</label>
+                                                    <input type="range" class="form-range" id="military-power" min="0" max="100" value="85">
+                                                    <span id="military-power-value">85</span>%
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="form-label">黑鸭会</label>
+                                                    <input type="range" class="form-range" id="blackduck-power" min="0" max="100" value="60">
+                                                    <span id="blackduck-power-value">60</span>%
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label class="form-label">平民阵营</label>
+                                                    <input type="range" class="form-range" id="commoner-power" min="0" max="100" value="40">
+                                                    <span id="commoner-power-value">40</span>%
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label class="form-label">学者阵营</label>
+                                                    <input type="range" class="form-range" id="scholar-power" min="0" max="100" value="55">
+                                                    <span id="scholar-power-value">55</span>%
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">力量平衡分析</label>
+                                        <div id="power-balance-analysis">
+                                            <div class="alert alert-info">
+                                                <strong>当前平衡状态:</strong> 苏丹王力量占优，大臣与将军形成平衡制约
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-primary" onclick="savePowerDistribution()">
+                                            <i class="fas fa-save"></i> 保存力量分布
+                                        </button>
+                                        <button class="btn btn-outline-warning" onclick="analyzeFactionsBalance()">
+                                            <i class="fas fa-chart-line"></i> 分析平衡
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Balance Analysis Section -->
+                <div id="balance" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">平衡分析</h1>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="runBalanceAnalysis()">
+                                <i class="fas fa-play"></i> 运行分析
+                            </button>
+                            <button class="btn btn-outline-info" onclick="saveBalanceReport()">
+                                <i class="fas fa-save"></i> 保存报告
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="autoBalanceAdjust()">
+                                <i class="fas fa-magic"></i> 自动调整
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-user-friends"></i> NPC平衡</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="npc-balance-analysis">
+                                        <!-- NPC balance analysis will be here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-id-card"></i> 卡片平衡</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="card-balance-analysis">
+                                        <!-- Card balance analysis will be here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-flag"></i> 阵营平衡</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="faction-balance-analysis">
+                                        <!-- Faction balance analysis will be here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div id="analytics" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">数据分析</h1>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="refreshAnalytics()">
+                                <i class="fas fa-sync-alt"></i> 刷新数据
+                            </button>
+                            <button class="btn btn-outline-info" onclick="exportAnalytics()">
+                                <i class="fas fa-download"></i> 导出报告
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="scheduleAnalytics()">
+                                <i class="fas fa-clock"></i> 定时分析
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-chart-line"></i> 游戏使用趋势</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="usage-trends-chart">
+                                        <!-- Usage trends chart will be here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-chart-bar"></i> 场景完成率</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="scene-completion-chart">
+                                        <!-- Scene completion chart will be here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Configuration Section -->
+                <div id="system" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">系统配置</h1>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="saveSystemConfig()">
+                                <i class="fas fa-save"></i> 保存配置
+                            </button>
+                            <button class="btn btn-outline-info" onclick="backupSystem()">
+                                <i class="fas fa-database"></i> 备份系统
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="restoreSystem()">
+                                <i class="fas fa-upload"></i> 恢复系统
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-cogs"></i> 游戏设置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="game-settings">
+                                        <!-- Game settings will be here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-server"></i> 服务器配置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="server-config">
+                                        <!-- Server configuration will be here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/comprehensive_admin.js"></script>
+</body>
+</html>

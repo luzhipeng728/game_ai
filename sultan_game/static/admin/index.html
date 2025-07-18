@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>苏丹的游戏 - 管理后台</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/admin.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <h4 class="text-light text-center mb-4">苏丹的游戏</h4>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active text-light" href="#" data-section="dashboard">
+                                <i class="fas fa-tachometer-alt"></i> 仪表板
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="#" data-section="scenes">
+                                <i class="fas fa-theater-masks"></i> 场景管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="#" data-section="npcs">
+                                <i class="fas fa-users"></i> NPC管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="#" data-section="cards">
+                                <i class="fas fa-id-card"></i> 卡片管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="#" data-section="ai-configs">
+                                <i class="fas fa-robot"></i> AI配置
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="#" data-section="templates">
+                                <i class="fas fa-clone"></i> 配置模板
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="#" data-section="analytics">
+                                <i class="fas fa-chart-bar"></i> 数据分析
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- 主内容区 -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- 仪表板 -->
+                <div id="dashboard" class="content-section">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">仪表板</h1>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card text-white bg-primary mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">场景总数</h5>
+                                    <h3 id="total-scenes">-</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-success mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">NPC总数</h5>
+                                    <h3 id="total-npcs">-</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-warning mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">卡片总数</h5>
+                                    <h3 id="total-cards">-</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-info mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">AI配置</h5>
+                                    <h3 id="total-ai-configs">-</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>最近活动</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="recent-activities">
+                                        <p class="text-muted">加载中...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>系统状态</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="system-status">
+                                        <p class="text-success"><i class="fas fa-circle"></i> 数据库连接正常</p>
+                                        <p class="text-success"><i class="fas fa-circle"></i> API服务运行中</p>
+                                        <p class="text-warning"><i class="fas fa-circle"></i> AI服务待配置</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 场景管理 -->
+                <div id="scenes" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">场景管理</h1>
+                        <button class="btn btn-primary" onclick="openSceneModal()">
+                            <i class="fas fa-plus"></i> 新建场景
+                        </button>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="scene-search" placeholder="搜索场景...">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="scene-category-filter">
+                                <option value="">所有类型</option>
+                                <option value="main_story">主线剧情</option>
+                                <option value="side_quest">支线任务</option>
+                                <option value="faction">阵营场景</option>
+                                <option value="random">随机事件</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="scene-status-filter">
+                                <option value="">所有状态</option>
+                                <option value="active">激活</option>
+                                <option value="draft">草稿</option>
+                                <option value="testing">测试中</option>
+                                <option value="archived">已归档</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>场景ID</th>
+                                    <th>名称</th>
+                                    <th>类型</th>
+                                    <th>状态</th>
+                                    <th>章节</th>
+                                    <th>NPC数量</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scenes-table-body">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- NPC管理 -->
+                <div id="npcs" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">NPC管理</h1>
+                        <button class="btn btn-primary" onclick="openNpcModal()">
+                            <i class="fas fa-plus"></i> 新建NPC
+                        </button>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="npc-search" placeholder="搜索NPC...">
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="npc-type-filter">
+                                <option value="">所有类型</option>
+                                <option value="game_npc">游戏NPC</option>
+                                <option value="player_npc">玩家NPC</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="npc-tier-filter">
+                                <option value="">所有稀有度</option>
+                                <option value="bronze">青铜</option>
+                                <option value="silver">白银</option>
+                                <option value="gold">黄金</option>
+                                <option value="legendary">传说</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="npc-faction-filter">
+                                <option value="">所有阵营</option>
+                                <option value="sultan">苏丹王</option>
+                                <option value="minister">大臣</option>
+                                <option value="military">将军</option>
+                                <option value="blackduck">黑鸭会</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>NPC ID</th>
+                                    <th>名称</th>
+                                    <th>类型</th>
+                                    <th>稀有度</th>
+                                    <th>阵营</th>
+                                    <th>INT/STR/DEF</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="npcs-table-body">
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 卡片管理 -->
+                <div id="cards" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">卡片管理</h1>
+                        <button class="btn btn-primary" onclick="openCardModal()">
+                            <i class="fas fa-plus"></i> 新建卡片
+                        </button>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="card-search" placeholder="搜索卡片...">
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="card-rarity-filter">
+                                <option value="">所有稀有度</option>
+                                <option value="common">普通</option>
+                                <option value="rare">稀有</option>
+                                <option value="epic">史诗</option>
+                                <option value="legendary">传说</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="card-type-filter">
+                                <option value="">所有类型</option>
+                                <option value="pass">通行证</option>
+                                <option value="attribute">属性</option>
+                                <option value="influence">影响</option>
+                                <option value="special">特殊</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>卡片ID</th>
+                                    <th>名称</th>
+                                    <th>稀有度</th>
+                                    <th>类型</th>
+                                    <th>消耗品</th>
+                                    <th>使用次数</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cards-table-body">
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- AI配置 -->
+                <div id="ai-configs" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">AI智能体配置</h1>
+                        <button class="btn btn-primary" onclick="openAiConfigModal()">
+                            <i class="fas fa-plus"></i> 新建AI配置
+                        </button>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="ai-search" placeholder="搜索AI配置...">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="ai-type-filter">
+                                <option value="">所有类型</option>
+                                <option value="narrator">旁白AI</option>
+                                <option value="npc">NPC AI</option>
+                                <option value="evaluator">评分AI</option>
+                                <option value="option_generator">话术生成AI</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>配置ID</th>
+                                    <th>名称</th>
+                                    <th>AI类型</th>
+                                    <th>版本</th>
+                                    <th>状态</th>
+                                    <th>创建者</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ai-configs-table-body">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 配置模板 -->
+                <div id="templates" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">配置模板</h1>
+                        <button class="btn btn-primary" onclick="openTemplateModal()">
+                            <i class="fas fa-plus"></i> 新建模板
+                        </button>
+                    </div>
+
+                    <div class="row" id="templates-container">
+                        <!-- 模板卡片将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 数据分析 -->
+                <div id="analytics" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">数据分析</h1>
+                        <div>
+                            <button class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-download"></i> 导出报告
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-sync"></i> 刷新数据
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title">场景使用率</h5>
+                                    <h2 class="text-primary">78%</h2>
+                                    <p class="text-muted">活跃场景占比</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title">NPC平衡性</h5>
+                                    <h2 class="text-success">85%</h2>
+                                    <p class="text-muted">平衡性评分</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title">卡片流行度</h5>
+                                    <h2 class="text-warning">92%</h2>
+                                    <p class="text-muted">高频使用卡片</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title">AI效果</h5>
+                                    <h2 class="text-info">73%</h2>
+                                    <p class="text-muted">AI满意度</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">场景流行度趋势</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>场景名称</th>
+                                                    <th>游玩次数</th>
+                                                    <th>成功率</th>
+                                                    <th>平均时长</th>
+                                                    <th>趋势</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>宰相的试探</td>
+                                                    <td>156</td>
+                                                    <td>68%</td>
+                                                    <td>15分钟</td>
+                                                    <td><span class="text-success">↗</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>朝堂密谋</td>
+                                                    <td>89</td>
+                                                    <td>72%</td>
+                                                    <td>22分钟</td>
+                                                    <td><span class="text-success">↗</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>将军的挑战</td>
+                                                    <td>203</td>
+                                                    <td>45%</td>
+                                                    <td>8分钟</td>
+                                                    <td><span class="text-danger">↘</span></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">最受欢迎的卡片</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <div class="d-flex justify-content-between">
+                                                <span>朝廷通行证</span>
+                                                <span class="badge bg-primary">234次</span>
+                                            </div>
+                                        </li>
+                                        <li class="mb-2">
+                                            <div class="d-flex justify-content-between">
+                                                <span>贿赂金币</span>
+                                                <span class="badge bg-warning">189次</span>
+                                            </div>
+                                        </li>
+                                        <li class="mb-2">
+                                            <div class="d-flex justify-content-between">
+                                                <span>说服大师</span>
+                                                <span class="badge bg-success">156次</span>
+                                            </div>
+                                        </li>
+                                        <li class="mb-2">
+                                            <div class="d-flex justify-content-between">
+                                                <span>军事令牌</span>
+                                                <span class="badge bg-danger">98次</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 场景配置模态框 -->
+    <div class="modal fade" id="sceneModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">场景配置</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="sceneTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="basic-tab" data-bs-toggle="tab" href="#basic">基础设定</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="npcs-tab" data-bs-toggle="tab" href="#npcs-config">NPC配置</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="ai-tab" data-bs-toggle="tab" href="#ai-config">AI配置</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="rewards-tab" data-bs-toggle="tab" href="#rewards">奖励设定</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3">
+                        <div class="tab-pane fade show active" id="basic" role="tabpanel">
+                            <!-- 基础设定表单 -->
+                            <form id="scene-basic-form">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">场景ID *</label>
+                                            <input type="text" class="form-control" name="scene_id" required placeholder="例: palace_intrigue">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">场景名称 *</label>
+                                            <input type="text" class="form-control" name="name" required placeholder="例: 朝堂密谋">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">场景类型 *</label>
+                                            <select class="form-select" name="category" required>
+                                                <option value="">请选择</option>
+                                                <option value="main_story">主线剧情</option>
+                                                <option value="side_quest">支线任务</option>
+                                                <option value="faction">阵营场景</option>
+                                                <option value="random">随机事件</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">章节</label>
+                                            <input type="number" class="form-control" name="chapter" value="1" min="1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">时间</label>
+                                            <select class="form-select" name="time_of_day">
+                                                <option value="">不限</option>
+                                                <option value="morning">早晨</option>
+                                                <option value="afternoon">下午</option>
+                                                <option value="evening">傍晚</option>
+                                                <option value="night">夜晚</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">场景描述</label>
+                                    <textarea class="form-control" name="description" rows="3" placeholder="描述这个场景的背景、环境和氛围..."></textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">地点</label>
+                                            <input type="text" class="form-control" name="location" placeholder="例: 皇宫大殿">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">天气</label>
+                                            <input type="text" class="form-control" name="weather" placeholder="例: 阴雨绵绵">
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="ai-config" role="tabpanel">
+                            <!-- AI配置表单 -->
+                            <form id="scene-ai-form">
+                                <div class="mb-3">
+                                    <label class="form-label">旁白AI提示词 *</label>
+                                    <textarea class="form-control" name="narrator_prompt" rows="4" required 
+                                              placeholder="你是这个场景的旁白AI，负责描述环境、气氛和人物行为..."></textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">旁白风格</label>
+                                            <select class="form-select" name="narrator_style">
+                                                <option value="">默认</option>
+                                                <option value="political_intrigue">政治阴谋</option>
+                                                <option value="military_tension">军事紧张</option>
+                                                <option value="diplomatic">外交斡旋</option>
+                                                <option value="mystery">神秘悬疑</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">旁白触发频率</label>
+                                            <input type="number" class="form-control" name="narrator_frequency" value="3" min="1" max="10">
+                                            <small class="text-muted">每几轮触发一次旁白</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="npcs-config" role="tabpanel">
+                            <div class="mb-3">
+                                <h6>场景NPC配置</h6>
+                                <div id="scene-npcs-list">
+                                    <!-- NPC列表将通过JavaScript生成 -->
+                                </div>
+                                <button type="button" class="btn btn-primary" onclick="addSceneNPC()">
+                                    <i class="fas fa-plus"></i> 添加NPC
+                                </button>
+                            </div>
+                            <div class="mb-3">
+                                <h6>当前场景NPC</h6>
+                                <div id="current-scene-npcs">
+                                    <!-- 当前场景的NPC将通过JavaScript生成 -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="rewards" role="tabpanel">
+                            <div class="mb-3">
+                                <h6>奖励设定</h6>
+                                <form id="scene-rewards-form">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">成功奖励 - 属性点</label>
+                                                <input type="number" class="form-control" name="success_attribute_points" value="15" min="0">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">成功奖励 - 经验值</label>
+                                                <input type="number" class="form-control" name="success_experience" value="100" min="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">成功奖励 - 声望</label>
+                                                <input type="number" class="form-control" name="success_reputation" value="10">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">成功奖励 - 金币</label>
+                                                <input type="number" class="form-control" name="success_gold" value="0" min="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">失败惩罚 - 声望</label>
+                                        <input type="number" class="form-control" name="failure_reputation" value="-5">
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveScene()">保存场景</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NPC配置模态框 -->
+    <div class="modal fade" id="npcModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">NPC配置</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="npc-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">NPC ID *</label>
+                                    <input type="text" class="form-control" name="npc_id" required placeholder="例: minister_chen">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">NPC名称 *</label>
+                                    <input type="text" class="form-control" name="name" required placeholder="例: 宰相陈">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">NPC类型 *</label>
+                                    <select class="form-select" name="npc_type" required>
+                                        <option value="">请选择</option>
+                                        <option value="game_npc">游戏NPC</option>
+                                        <option value="player_npc">玩家NPC</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">品质等级 *</label>
+                                    <select class="form-select" name="tier" required>
+                                        <option value="">请选择</option>
+                                        <option value="bronze">青铜</option>
+                                        <option value="silver">白银</option>
+                                        <option value="gold">黄金</option>
+                                        <option value="legendary">传说</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">阵营 *</label>
+                                    <select class="form-select" name="faction" required>
+                                        <option value="">请选择</option>
+                                        <option value="sultan">苏丹王</option>
+                                        <option value="minister">大臣</option>
+                                        <option value="military">将军</option>
+                                        <option value="blackduck">黑鸭会</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">智力 (1-20) *</label>
+                                    <input type="number" class="form-control" name="intelligence" required min="1" max="20" value="10">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">武力 (1-100) *</label>
+                                    <input type="number" class="form-control" name="strength" required min="1" max="100" value="50">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">防御 (1-100) *</label>
+                                    <input type="number" class="form-control" name="defense" required min="1" max="100" value="50">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">血量 (1-500) *</label>
+                                    <input type="number" class="form-control" name="hp_max" required min="1" max="500" value="100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">魅力 (1-100)</label>
+                                    <input type="number" class="form-control" name="charisma" min="1" max="100" value="50">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">忠诚度 (1-100)</label>
+                                    <input type="number" class="form-control" name="loyalty" min="1" max="100" value="50">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">恐惧值 (1-100)</label>
+                                    <input type="number" class="form-control" name="fear" min="1" max="100" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">外观描述</label>
+                            <textarea class="form-control" name="appearance" rows="2" placeholder="描述NPC的外观特征..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">背景描述</label>
+                            <textarea class="form-control" name="description" rows="3" placeholder="描述NPC的背景故事和性格..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNPC()">保存NPC</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡片配置模态框 -->
+    <div class="modal fade" id="cardModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">卡片配置</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="card-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">卡片ID *</label>
+                                    <input type="text" class="form-control" name="card_id" required placeholder="例: court_pass">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">卡片名称 *</label>
+                                    <input type="text" class="form-control" name="name" required placeholder="例: 朝廷通行证">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">稀有度 *</label>
+                                    <select class="form-select" name="rarity" required>
+                                        <option value="">请选择</option>
+                                        <option value="common">普通</option>
+                                        <option value="rare">稀有</option>
+                                        <option value="epic">史诗</option>
+                                        <option value="legendary">传说</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">卡片类型 *</label>
+                                    <select class="form-select" name="category" required>
+                                        <option value="">请选择</option>
+                                        <option value="pass">通行证类</option>
+                                        <option value="attribute">属性增强类</option>
+                                        <option value="influence">影响判定类</option>
+                                        <option value="special">特殊功能类</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">子类型</label>
+                                    <input type="text" class="form-control" name="sub_category" placeholder="例: social, military">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">基础成本</label>
+                                    <input type="number" class="form-control" name="base_cost" value="0" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">最大堆叠</label>
+                                    <input type="number" class="form-control" name="max_stack" value="1" min="1">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_consumable" id="is_consumable" checked>
+                                <label class="form-check-label" for="is_consumable">
+                                    是否消耗品
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">卡片描述</label>
+                            <textarea class="form-control" name="description" rows="3" placeholder="描述卡片的作用和效果..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">风味文本</label>
+                            <textarea class="form-control" name="flavor_text" rows="2" placeholder="卡片的背景故事或引言..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCard()">保存卡片</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI配置模态框 -->
+    <div class="modal fade" id="aiConfigModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">AI配置</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="ai-config-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">配置ID *</label>
+                                    <input type="text" class="form-control" name="config_id" required placeholder="例: narrator_political_v1">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">配置名称 *</label>
+                                    <input type="text" class="form-control" name="name" required placeholder="例: 政治场景旁白AI">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">AI类型 *</label>
+                                    <select class="form-select" name="ai_type" required>
+                                        <option value="">请选择</option>
+                                        <option value="narrator">旁白AI</option>
+                                        <option value="evaluator">评分AI</option>
+                                        <option value="option_generator">选项生成AI</option>
+                                        <option value="character">角色AI</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">版本</label>
+                                    <input type="text" class="form-control" name="version" value="1.0" placeholder="例: 1.0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">创建者</label>
+                                    <input type="text" class="form-control" name="created_by" placeholder="例: admin">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">基础提示词 *</label>
+                            <textarea class="form-control" name="base_prompt" rows="4" required placeholder="输入AI的基础提示词..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">系统提示词</label>
+                            <textarea class="form-control" name="system_prompt" rows="3" placeholder="输入系统级提示词..."></textarea>
+                        </div>
+                        
+                        <!-- 模型配置 -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h6>模型配置</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Temperature</label>
+                                            <input type="number" class="form-control" name="temperature" value="0.7" min="0" max="2" step="0.1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Max Tokens</label>
+                                            <input type="number" class="form-control" name="max_tokens" value="2048" min="1" max="4096">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Top P</label>
+                                            <input type="number" class="form-control" name="top_p" value="0.9" min="0" max="1" step="0.1">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 角色配置 -->
+                        <div class="mb-3">
+                            <h6>角色配置</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">性格特点</label>
+                                        <input type="text" class="form-control" name="personality" placeholder="例: 严肃, 智慧, 公正">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">说话风格</label>
+                                        <input type="text" class="form-control" name="speaking_style" placeholder="例: 正式, 古典, 诗意">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 评估配置 -->
+                        <div class="mb-3">
+                            <h6>评估配置</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">故事进度权重</label>
+                                        <input type="number" class="form-control" name="story_weight" value="0.4" min="0" max="1" step="0.1">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">对话质量权重</label>
+                                        <input type="number" class="form-control" name="dialogue_weight" value="0.3" min="0" max="1" step="0.1">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">紧张程度权重</label>
+                                        <input type="number" class="form-control" name="tension_weight" value="0.3" min="0" max="1" step="0.1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 生成配置 -->
+                        <div class="mb-3">
+                            <h6>生成配置</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">生成风格</label>
+                                        <input type="text" class="form-control" name="generation_style" placeholder="例: diplomatic, aggressive, clever">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">风格偏好</label>
+                                        <input type="text" class="form-control" name="style_bias" placeholder="例: diplomatic">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 旁白配置 -->
+                        <div class="mb-3">
+                            <h6>旁白配置</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">旁白风格</label>
+                                        <input type="text" class="form-control" name="narrator_style" placeholder="例: political_intrigue, military_tension">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">触发频率</label>
+                                        <input type="number" class="form-control" name="trigger_frequency" value="3" min="1" max="10">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAIConfig()">保存配置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 配置模板模态框 -->
+    <div class="modal fade" id="templateModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">配置模板</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="template-form">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label">模板名称 *</label>
+                                    <input type="text" class="form-control" name="name" required placeholder="例: 旁白AI模板">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">模板类型 *</label>
+                                    <select class="form-select" name="type" required>
+                                        <option value="">请选择</option>
+                                        <option value="ai_config">AI配置</option>
+                                        <option value="scene_config">场景配置</option>
+                                        <option value="npc_config">NPC配置</option>
+                                        <option value="card_config">卡片配置</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">模板描述</label>
+                            <textarea class="form-control" name="description" rows="3" placeholder="描述这个模板的用途和特点..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">模板配置 *</label>
+                            <textarea class="form-control" name="config" rows="10" required placeholder="输入JSON格式的配置内容..."></textarea>
+                            <div class="form-text">请输入有效的JSON格式配置</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">版本</label>
+                                    <input type="text" class="form-control" name="version" value="1.0" placeholder="例: 1.0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">创建者</label>
+                                    <input type="text" class="form-control" name="created_by" placeholder="例: admin">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_public" id="is_public" checked>
+                                <label class="form-check-label" for="is_public">
+                                    公开模板（其他用户可以使用）
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveTemplate()">保存模板</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/comprehensive_admin.js"></script>
+</body>
+</html>

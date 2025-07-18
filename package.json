@@ -1,0 +1,21 @@
+{
+  "name": "sultan-game-docs",
+  "version": "1.0.0",
+  "description": "Design documentation for the Sultan Game",
+  "main": "index.js",
+  "scripts": {
+    "docs:dev": "vitepress dev game_design_docs",
+    "docs:build": "vitepress build game_design_docs",
+    "docs:preview": "vitepress preview game_design_docs",
+    "vercel-build": "vitepress build game_design_docs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@mermaid-js/mermaid-mindmap": "^9.3.0",
+    "mermaid": "^8.14.0",
+    "vitepress": "^1.2.2",
+    "vitepress-plugin-mermaid": "^2.0.10"
+  }
+}
