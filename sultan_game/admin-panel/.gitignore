@@ -14,7 +14,7 @@
 /coverage
 
 # next.js
-/.next/
+# /.next/  # 注释掉这行，允许提交构建结果
 /out/
 
 # production
