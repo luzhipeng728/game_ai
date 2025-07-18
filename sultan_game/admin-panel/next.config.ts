@@ -7,9 +7,7 @@ const nextConfig: NextConfig = {
       {
         source: '/api/:path*',
         destination: process.env.NODE_ENV === 'production' 
-          ? (process.env.HTTPS_BACKEND === 'true' 
-             ? 'https://api.luzhipeng.com/api/:path*' 
-             : 'http://82.197.94.152:8001/api/:path*')
+          ? 'https://test_api.luzhipeng.com/api/:path*' 
           : 'http://localhost:8001/api/:path*'
       }
     ];

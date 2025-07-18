@@ -1,7 +1,7 @@
 {
   "version": 4,
   "routes": {
-    "/": {
+    "/npcs": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -14,8 +14,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/",
-      "dataRoute": "/index.rsc",
+      "srcRoute": "/npcs",
+      "dataRoute": "/npcs.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -54,54 +54,6 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/cards": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/cards",
-      "dataRoute": "/cards.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
-    "/npcs": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/npcs",
-      "dataRoute": "/npcs.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
     "/templates": {
       "experimentalBypassFor": [
         {
@@ -126,7 +78,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/scenes": {
+    "/cards": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -139,8 +91,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/scenes",
-      "dataRoute": "/scenes.rsc",
+      "srcRoute": "/cards",
+      "dataRoute": "/cards.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -173,13 +125,61 @@
         "x-next-revalidated-tags",
         "x-next-revalidate-tag-token"
       ]
+    },
+    "/": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/",
+      "dataRoute": "/index.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/scenes": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/scenes",
+      "dataRoute": "/scenes.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
     }
   },
   "dynamicRoutes": {},
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "e1f86fd14fe6fa2e3d6f67230218f122",
-    "previewModeSigningKey": "c3ef2e26a58f0250d875c48ca8c7b59ef2d11b7d3b13bb31436f9bb4d15c9385",
-    "previewModeEncryptionKey": "0e9312730bea70fdfcc8bb392392de64ccc671ce3d5088cfd829522e87cf9133"
+    "previewModeId": "35eebc7bac4726e65c7ca36ea9faa57d",
+    "previewModeSigningKey": "c3e52d1080991cb3a6f32b9398ae97c4c01501b7fbbc261ed9d38a9db72a845c",
+    "previewModeEncryptionKey": "d3677caea2c85ded6c2712a5fc3a0cde3da8bad41c56d861ab5760065acaab70"
   }
 }
