@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Layout from '@/components/Layout';
+import Layout from '../../components/Layout';
 import { Plus, Edit, Trash2, Star, Zap } from 'lucide-react';
-import { cardAPI } from '@/lib/api';
+import { cardAPI } from '../../lib/api';
 
 interface Card {
   id: string;

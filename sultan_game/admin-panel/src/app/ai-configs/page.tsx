@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Layout from '@/components/Layout';
+import Layout from '../../components/Layout';
 import { Plus, Edit, Trash2, Play, BarChart3, Zap } from 'lucide-react';
-import { aiConfigAPI } from '@/lib/api';
+import { aiConfigAPI } from '../../lib/api';
 
 interface AIConfig {
   id: string;

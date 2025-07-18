@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Layout from '@/components/Layout';
+import Layout from '../../components/Layout';
 import { Plus, Edit, Trash2, Crown, Sword, Shield } from 'lucide-react';
-import { npcAPI } from '@/lib/api';
+import { npcAPI } from '../../lib/api';
 
 interface NPC {
   id: string;

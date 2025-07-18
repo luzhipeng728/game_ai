@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Layout from '@/components/Layout';
-import { ToastContainer, useToast } from '@/components/Toast';
+import Layout from '../../components/Layout';
+import { ToastContainer, useToast } from '../../components/Toast';
 import { Plus, Edit, Trash2, Eye, Settings, Award, ChevronDown, ChevronRight, CreditCard, FileText, Gift } from 'lucide-react';
-import { sceneAPI, npcAPI } from '@/lib/api';
+import { sceneAPI, npcAPI } from '../../lib/api';
 
 interface Scene {
   id: string;
