@@ -12,6 +12,27 @@ const nextConfig: NextConfig = {
       }
     ];
   },
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+        ],
+      },
+    ];
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -27,7 +48,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   // 添加 allowedDevOrigins 配置
-  allowedDevOrigins: ['82.197.94.152'],
+  allowedDevOrigins: ['82.197.94.152', 'game_ai.luzhipeng.com'],
 };
 
 export default nextConfig;

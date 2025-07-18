@@ -98,7 +98,8 @@
     },
     "outputFileTracingRoot": "/Users/luzhipeng/lu/game_ai/sultan_game/admin-panel",
     "allowedDevOrigins": [
-      "82.197.94.152"
+      "82.197.94.152",
+      "game_ai.luzhipeng.com"
     ],
     "experimental": {
       "useSkewCookie": false,
