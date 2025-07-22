@@ -2,41 +2,20 @@ import type { NextConfig } from "next";
 import path from 'path';
 
 const nextConfig: NextConfig = {
-  async rewrites() {
-    // 读取环境变量，支持自定义后端地址
-    const backendUrl = process.env.BACKEND_URL || 
-      (process.env.NODE_ENV === 'production' 
-        ? 'http://localhost:8001'  // 生产环境默认本地后端
-        : 'http://localhost:8001'); // 开发环境本地后端
-    
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*`
-      }
-    ];
-  },
-  async headers() {
-    return [
-      {
-        source: '/api/:path*',
-        headers: [
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, PUT, DELETE, OPTIONS',
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization',
-          },
-        ],
-      },
-    ];
-  },
+  // 移除前端转发配置，改回直接请求后端
+  // async rewrites() {
+  //   const backendUrl = process.env.BACKEND_URL || 
+  //     (process.env.NODE_ENV === 'production' 
+  //       ? 'http://localhost:8001'
+  //       : 'http://localhost:8001');
+  //   
+  //   return [
+  //     {
+  //       source: '/api/:path*',
+  //       destination: `${backendUrl}/api/:path*`
+  //     }
+  //   ];
+  // },
   typescript: {
     ignoreBuildErrors: true,
   },
