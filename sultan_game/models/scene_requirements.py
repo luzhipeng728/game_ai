@@ -96,10 +96,25 @@ class SceneRewardExtended(Base):
     success_reputation = Column(Integer, default=0)
     success_gold = Column(Integer, default=0)
     
-    # 失败惩罚
+    # 失败惩罚 - 基础数值
     failure_reputation = Column(Integer, default=0)
-    failure_gold = Column(Integer, default=0)
-    failure_attribute_penalty = Column(Integer, default=0)
+    
+    # 失败惩罚 - 各属性具体惩罚数值
+    failure_strength_penalty = Column(Integer, default=0)     # 力量惩罚
+    failure_defense_penalty = Column(Integer, default=0)      # 防御惩罚
+    failure_intelligence_penalty = Column(Integer, default=0) # 智力惩罚
+    failure_charisma_penalty = Column(Integer, default=0)     # 魅力惩罚
+    failure_loyalty_penalty = Column(Integer, default=0)      # 忠诚惩罚
+    failure_influence_penalty = Column(Integer, default=0)    # 影响力惩罚
+    failure_command_penalty = Column(Integer, default=0)      # 指挥力惩罚
+    failure_stealth_penalty = Column(Integer, default=0)      # 隐秘惩罚
+    
+    # 失败惩罚 - 生命值惩罚
+    failure_health_penalty = Column(Integer, default=0)       # 生命值惩罚
+    failure_health_penalty_type = Column(String(20), default="fixed")  # "fixed"固定值/"percentage"百分比
+    
+    # 失败惩罚说明
+    failure_penalty_description = Column(Text)  # 惩罚描述说明
     
     # 卡片奖励
     reward_cards = Column(JSON, default=list)  # 奖励的卡片列表

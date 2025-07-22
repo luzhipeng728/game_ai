@@ -50,6 +50,11 @@ class Scene(Base):
     max_attempts = Column(Integer, default=1)
     cooldown_hours = Column(Integer, default=0)
     
+    # 场景展示配置
+    card_count = Column(Integer, default=0)  # 折卡数量
+    prerequisite_scenes = Column(Text, default='[]')  # 前置场景列表 (JSON string)
+    days_required = Column(Integer, default=0)  # 天数要求
+    
     # 系统字段
     status = Column(Enum(SceneStatus), default=SceneStatus.DRAFT)
     is_active = Column(Boolean, default=True)
@@ -192,13 +197,25 @@ class SceneReward(Base):
     unlocked_features = Column(JSON, default=list)
     unlocked_npcs = Column(JSON, default=list)
     
-    # 失败惩罚
-    failure_reputation = Column(Integer, default=-5)
-    failure_faction_relations = Column(JSON, default=dict)
-    # 格式: {"minister": -10, "military": -5}
+    # 失败惩罚 - 简化版本
+    failure_reputation = Column(Integer, default=-5)          # 声望惩罚
     
-    failure_triggered_events = Column(JSON, default=list)
-    # 格式: ["minister_suspicion", "increased_security"]
+    # 失败惩罚 - 属性点惩罚（各属性具体数值）
+    failure_strength_penalty = Column(Integer, default=0)     # 力量惩罚
+    failure_defense_penalty = Column(Integer, default=0)      # 防御惩罚
+    failure_intelligence_penalty = Column(Integer, default=0) # 智力惩罚
+    failure_charisma_penalty = Column(Integer, default=0)     # 魅力惩罚
+    failure_loyalty_penalty = Column(Integer, default=0)      # 忠诚惩罚
+    failure_influence_penalty = Column(Integer, default=0)    # 影响力惩罚
+    failure_command_penalty = Column(Integer, default=0)      # 指挥力惩罚
+    failure_stealth_penalty = Column(Integer, default=0)      # 隐秘惩罚
+    
+    # 失败惩罚 - 生命值惩罚
+    failure_health_penalty = Column(Integer, default=0)       # 生命值惩罚
+    failure_health_penalty_type = Column(String(20), default="fixed")  # "fixed"固定值/"percentage"百分比
+    
+    # 失败惩罚说明
+    failure_penalty_description = Column(Text)  # 惩罚描述说明
     
     # 完美通关奖励（额外奖励）
     perfect_bonus_conditions = Column(JSON, default=list)

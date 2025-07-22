@@ -1,13 +1,23 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from api import scenes, npcs, cards, ai_configs, templates
 from core.database import Base, engine
+from core.logging_config import get_logger, log_api_request, setup_logging
 import time
+import traceback
+
+# 初始化日志系统
+logger = get_logger(__name__)
+logger.info("启动苏丹的游戏后端API系统")
 
 # 创建数据库表
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+    logger.info("数据库表创建/更新成功")
+except Exception as e:
+    logger.error(f"数据库初始化失败: {e}")
 
 # 创建FastAPI应用
 app = FastAPI(
@@ -15,6 +25,53 @@ app = FastAPI(
     description="AI多智能体游戏后端管理系统",
     version="1.0.0"
 )
+
+# 添加API请求日志中间件
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    
+    # 记录请求开始
+    logger.info(f"API Request: {request.method} {request.url}")
+    
+    try:
+        response = await call_next(request)
+        process_time = time.time() - start_time
+        
+        # 记录成功响应
+        log_api_request(
+            method=request.method,
+            url=str(request.url),
+            status_code=response.status_code,
+            response_time=process_time
+        )
+        
+        return response
+    except Exception as e:
+        process_time = time.time() - start_time
+        error_msg = f"{type(e).__name__}: {str(e)}"
+        
+        # 记录错误响应
+        log_api_request(
+            method=request.method,
+            url=str(request.url),
+            status_code=500,
+            response_time=process_time,
+            error=error_msg
+        )
+        
+        logger.error(f"API Error: {request.method} {request.url} - {error_msg}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        
+        # 返回统一的错误响应
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": "Internal server error",
+                "detail": str(e) if logger.level <= 10 else "An error occurred",  # DEBUG模式显示详细错误
+                "timestamp": int(time.time())
+            }
+        )
 
 # 添加CORS中间件
 app.add_middleware(
@@ -43,7 +100,50 @@ async def root():
 # 健康检查
 @app.get("/health")
 async def health_check():
+    logger.info("健康检查请求")
     return {"status": "healthy", "timestamp": int(time.time())}
+
+# 日志查看API
+@app.get("/api/logs")
+async def get_logs(log_type: str = "all", lines: int = 100):
+    """
+    获取日志内容
+    log_type: all | error | api
+    lines: 返回的行数
+    """
+    from pathlib import Path
+    from datetime import datetime
+    
+    LOG_DIR = Path("logs")
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    try:
+        if log_type == "error":
+            log_file = LOG_DIR / f"error_{today}.log"
+        elif log_type == "api":
+            log_file = LOG_DIR / f"api_{today}.log"
+        else:
+            log_file = LOG_DIR / f"sultan_game_{today}.log"
+        
+        if not log_file.exists():
+            return {"logs": [], "message": f"Log file not found: {log_file}"}
+        
+        # 读取最后N行
+        with open(log_file, 'r', encoding='utf-8') as f:
+            all_lines = f.readlines()
+            recent_lines = all_lines[-lines:] if len(all_lines) > lines else all_lines
+        
+        logger.info(f"获取日志: {log_type}, {len(recent_lines)} 行")
+        return {
+            "logs": [line.strip() for line in recent_lines],
+            "total_lines": len(recent_lines),
+            "log_file": str(log_file),
+            "log_type": log_type
+        }
+        
+    except Exception as e:
+        logger.error(f"读取日志文件失败: {e}")
+        return {"error": str(e), "logs": []}
 
 # 仪表板API
 @app.get("/api/dashboard/stats")

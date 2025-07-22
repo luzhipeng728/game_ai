@@ -63,23 +63,38 @@ export default function ScenesPage() {
   // 扩展奖励配置相关状态
   const [showExtendedRewardModal, setShowExtendedRewardModal] = useState(false);
   const [extendedRewardData, setExtendedRewardData] = useState({
+    // 成功奖励
     success_attribute_points: 0,
     success_experience: 0,
     success_reputation: 0,
     success_gold: 0,
+    
+    // 失败惩罚 - 基础数值
     failure_reputation: 0,
-    failure_gold: 0,
-    failure_attribute_penalty: 0,
+    
+    // 失败惩罚 - 各属性具体惩罚数值
+    failure_strength_penalty: 0,
+    failure_defense_penalty: 0,
+    failure_intelligence_penalty: 0,
+    failure_charisma_penalty: 0,
+    failure_loyalty_penalty: 0,
+    failure_influence_penalty: 0,
+    failure_command_penalty: 0,
+    failure_stealth_penalty: 0,
+    
+    // 失败惩罚 - 生命值惩罚
+    failure_health_penalty: 0,
+    failure_health_penalty_type: 'fixed', // 'fixed' 或 'percentage'
+    
+    // 失败惩罚说明
+    failure_penalty_description: '',
+    
+    // 奖励内容
     reward_cards: [],
-    card_reward_probability: {},
     reward_npcs: [],
-    npc_reward_conditions: {},
     special_rewards: {},
     unlock_content: [],
     perfect_completion_bonus: {},
-    time_bonus: {},
-    efficiency_bonus: {},
-    dynamic_reward_formula: '',
     performance_multiplier: 1.0
   });
   
@@ -329,9 +344,26 @@ export default function ScenesPage() {
         success_experience: 0,
         success_reputation: 0,
         success_gold: 0,
+        
+        // 失败惩罚 - 基础数值
         failure_reputation: 0,
-        failure_gold: 0,
-        failure_attribute_penalty: 0,
+        
+        // 失败惩罚 - 各属性具体惩罚数值
+        failure_strength_penalty: 0,
+        failure_defense_penalty: 0,
+        failure_intelligence_penalty: 0,
+        failure_charisma_penalty: 0,
+        failure_loyalty_penalty: 0,
+        failure_influence_penalty: 0,
+        failure_command_penalty: 0,
+        failure_stealth_penalty: 0,
+        
+        // 失败惩罚 - 生命值惩罚
+        failure_health_penalty: 0,
+        failure_health_penalty_type: 'fixed',
+        
+        // 失败惩罚说明
+        failure_penalty_description: '',
         reward_cards: [],
         reward_npcs: [],
         special_rewards: {},
@@ -741,7 +773,14 @@ export default function ScenesPage() {
         npcAPI.getNPCs().catch(() => ({ data: [] })),
         sceneAPI.getAvailablePlayerNPCs().catch(() => ({ data: [] })),
         sceneAPI.getSceneRewards(scene.id).catch(() => ({ data: { success_attribute_points: 0, success_experience: 0, success_reputation: 0, success_gold: 0, failure_reputation: 0 } })),
-        sceneAPI.getSceneExtendedRewards(scene.id).catch(() => ({ data: { success_attribute_points: 0, success_experience: 0, success_reputation: 0, success_gold: 0, failure_reputation: 0, failure_gold: 0, failure_attribute_penalty: 0, reward_cards: [], card_reward_probability: {}, reward_npcs: [], npc_reward_conditions: {}, special_rewards: {}, unlock_content: [], perfect_completion_bonus: {}, time_bonus: {}, efficiency_bonus: {}, dynamic_reward_formula: '', performance_multiplier: 1.0 } }))
+        sceneAPI.getSceneExtendedRewards(scene.id).catch(() => ({ data: { 
+          success_attribute_points: 0, success_experience: 0, success_reputation: 0, success_gold: 0, 
+          failure_reputation: 0, failure_strength_penalty: 0, failure_defense_penalty: 0, failure_intelligence_penalty: 0, 
+          failure_charisma_penalty: 0, failure_loyalty_penalty: 0, failure_influence_penalty: 0, failure_command_penalty: 0, 
+          failure_stealth_penalty: 0, failure_health_penalty: 0, failure_health_penalty_type: 'fixed', 
+          failure_penalty_description: '', reward_cards: [], reward_npcs: [], special_rewards: {}, 
+          unlock_content: [], perfect_completion_bonus: {}, performance_multiplier: 1.0 
+        } }))
       ]);
       
       // 设置所有配置数据
@@ -1325,37 +1364,153 @@ export default function ScenesPage() {
                       </div>
                     </div>
                     
-                    {/* 扩展失败惩罚 */}
+                    {/* 失败惩罚配置 */}
                     <div>
-                      <h5 className="font-medium mb-2">扩展失败惩罚</h5>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">声望损失</label>
-                          <input
-                            type="number"
-                            value={extendedRewardData.failure_reputation}
-                            onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_reputation: parseInt(e.target.value) || 0})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          />
+                      <h5 className="font-medium mb-3 text-red-700">失败惩罚配置</h5>
+                      
+                      {/* 基础惩罚 */}
+                      <div className="mb-4">
+                        <h6 className="font-medium mb-2 text-sm">基础惩罚</h6>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">声望惩罚</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_reputation}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_reputation: parseInt(e.target.value) || 0})}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              placeholder="失败时扣除的声望值"
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">金币损失</label>
-                          <input
-                            type="number"
-                            value={extendedRewardData.failure_gold}
-                            onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_gold: parseInt(e.target.value) || 0})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          />
+                      </div>
+
+                      {/* 属性惩罚 */}
+                      <div className="mb-4">
+                        <h6 className="font-medium mb-2 text-sm">属性惩罚</h6>
+                        <div className="grid grid-cols-4 gap-3">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">力量</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_strength_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_strength_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">防御</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_defense_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_defense_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">智力</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_intelligence_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_intelligence_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">魅力</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_charisma_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_charisma_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">忠诚</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_loyalty_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_loyalty_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">影响力</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_influence_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_influence_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">指挥力</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_command_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_command_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">隐秘</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_stealth_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_stealth_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">属性惩罚</label>
-                          <input
-                            type="number"
-                            value={extendedRewardData.failure_attribute_penalty}
-                            onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_attribute_penalty: parseInt(e.target.value) || 0})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          />
+                      </div>
+
+                      {/* 生命值惩罚 */}
+                      <div className="mb-4">
+                        <h6 className="font-medium mb-2 text-sm">生命值惩罚</h6>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">惩罚数值</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_health_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_health_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              min="0"
+                              placeholder="扣除的生命值"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">惩罚类型</label>
+                            <select
+                              value={extendedRewardData.failure_health_penalty_type}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_health_penalty_type: e.target.value})}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            >
+                              <option value="fixed">固定数值</option>
+                              <option value="percentage">百分比</option>
+                            </select>
+                          </div>
                         </div>
+                      </div>
+
+                      {/* 惩罚说明 */}
+                      <div>
+                        <h6 className="font-medium mb-2 text-sm">惩罚说明</h6>
+                        <textarea
+                          value={extendedRewardData.failure_penalty_description}
+                          onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_penalty_description: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          rows={3}
+                          placeholder="失败惩罚的详细说明，会显示给玩家"
+                        />
                       </div>
                     </div>
                     
@@ -2837,19 +2992,164 @@ export default function ScenesPage() {
                             placeholder="成功获得的金钱"
                           />
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">失败 - 声望</label>
-                          <input
-                            type="number"
-                            value={rewardData.failure_reputation}
-                            onChange={(e) => setRewardData({
-                              ...rewardData,
-                              failure_reputation: parseInt(e.target.value) || 0
-                            })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="失败时的声望惩罚"
-                          />
+                      </div>
+                    </div>
+
+                    {/* 失败惩罚配置 */}
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-medium mb-3 text-red-700">失败惩罚配置</h4>
+                      
+                      {/* 基础惩罚 */}
+                      <div className="mb-4">
+                        <h5 className="font-medium mb-2 text-sm">基础惩罚</h5>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">声望惩罚</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_reputation}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_reputation: parseInt(e.target.value) || 0})}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              placeholder="失败时扣除的声望值"
+                            />
+                          </div>
                         </div>
+                      </div>
+
+                      {/* 属性惩罚 */}
+                      <div className="mb-4">
+                        <h5 className="font-medium mb-2 text-sm">属性惩罚</h5>
+                        <div className="grid grid-cols-4 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">力量</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_strength_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_strength_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">防御</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_defense_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_defense_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">智力</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_intelligence_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_intelligence_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">魅力</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_charisma_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_charisma_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">忠诚</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_loyalty_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_loyalty_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">影响力</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_influence_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_influence_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">指挥力</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_command_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_command_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">隐秘</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_stealth_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_stealth_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              min="0"
+                              placeholder="0"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 生命值惩罚 */}
+                      <div className="mb-4">
+                        <h5 className="font-medium mb-2 text-sm">生命值惩罚</h5>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">惩罚数值</label>
+                            <input
+                              type="number"
+                              value={extendedRewardData.failure_health_penalty}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_health_penalty: parseInt(e.target.value) || 0})}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              min="0"
+                              placeholder="扣除的生命值"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">惩罚类型</label>
+                            <select
+                              value={extendedRewardData.failure_health_penalty_type}
+                              onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_health_penalty_type: e.target.value})}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            >
+                              <option value="fixed">固定数值</option>
+                              <option value="percentage">百分比</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 惩罚说明 */}
+                      <div>
+                        <h5 className="font-medium mb-2 text-sm">惩罚说明</h5>
+                        <textarea
+                          value={extendedRewardData.failure_penalty_description}
+                          onChange={(e) => setExtendedRewardData({...extendedRewardData, failure_penalty_description: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          rows={3}
+                          placeholder="失败惩罚的详细说明，会显示给玩家"
+                        />
                       </div>
                     </div>
 

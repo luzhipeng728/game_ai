@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, Text, JSON, Boolean, ForeignKey, Enum
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from core.database import Base
 import uuid
@@ -26,7 +25,7 @@ class SceneStatus(enum.Enum):
 class Scene(Base):
     __tablename__ = "scenes"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     scene_id = Column(String(50), unique=True, nullable=False, index=True)
     name = Column(String(100), nullable=False)
     category = Column(Enum(SceneCategory), nullable=False)
@@ -40,29 +39,42 @@ class Scene(Base):
     time_of_day = Column(Enum(TimeOfDay))
     weather = Column(String(50))
     
+    # 额外字段 (为了兼容现有数据库)
+    scene_type = Column(String(50))
+    difficulty_level = Column(Integer)
+    estimated_duration = Column(Integer)
+    is_repeatable = Column(Boolean)
+    max_attempts = Column(Integer)
+    cooldown_hours = Column(Integer)
+    
     # 进入条件
-    attribute_requirements = Column(JSON, default=dict)  # 属性要求
-    card_requirements = Column(JSON, default=dict)      # 卡片要求
-    prerequisites = Column(JSON, default=dict)          # 前置条件
-    restrictions = Column(JSON, default=dict)           # 进入限制
+    attribute_requirements = Column(Text, default='{}')  # 属性要求
+    card_requirements = Column(Text, default='{}')      # 卡片要求
+    prerequisites = Column(Text, default='{}')          # 前置条件
+    restrictions = Column(Text, default='{}')           # 进入限制
     
     # 玩家NPC配置
     min_player_npcs = Column(Integer, default=1)
     max_player_npcs = Column(Integer, default=3)
-    recommended_npc_types = Column(JSON, default=list)
-    special_bonuses = Column(JSON, default=dict)
+    recommended_npc_types = Column(Text, default='[]')
+    special_bonuses = Column(Text, default='{}')
     
     # AI Prompt配置
     narrator_prompt = Column(Text, nullable=False)
-    evaluator_config = Column(JSON, default=dict)
+    evaluator_config = Column(Text, default='{}')
     
     # 奖励配置
-    success_rewards = Column(JSON, default=dict)
-    failure_penalties = Column(JSON, default=dict)
+    success_rewards = Column(Text, default='{}')
+    failure_penalties = Column(Text, default='{}')
     
     # 特殊机制
-    dynamic_events = Column(JSON, default=list)
-    hidden_elements = Column(JSON, default=dict)
+    dynamic_events = Column(Text, default='[]')
+    hidden_elements = Column(Text, default='{}')
+    
+    # 场景展示配置
+    card_count = Column(Integer, default=0)  # 折卡数量
+    prerequisite_scenes = Column(JSON, default=list)  # 前置场景列表 (JSON array)
+    days_required = Column(Integer, default=0)  # 天数要求
     
     # 系统字段
     status = Column(Enum(SceneStatus), default=SceneStatus.DRAFT)
@@ -76,9 +88,9 @@ class Scene(Base):
 class SceneNPC(Base):
     __tablename__ = "scene_npcs"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    scene_id = Column(UUID(as_uuid=True), ForeignKey("scenes.id"), nullable=False)
-    npc_id = Column(UUID(as_uuid=True), ForeignKey("npcs.id"), nullable=False)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    scene_id = Column(String(36), ForeignKey("scenes.id"), nullable=False)
+    npc_id = Column(String(36), ForeignKey("npcs.id"), nullable=False)
     
     # 场景中的角色设定
     role = Column(String(50))  # main_antagonist, supporter, etc.

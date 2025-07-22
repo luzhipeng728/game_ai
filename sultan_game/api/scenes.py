@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 from core.database import get_db
+from core.logging_config import get_logger, log_database_operation
 from models import (
     Scene, SceneCategory, SceneStatus, TimeOfDay, SceneAIConfiguration,
     SceneRequirement, RequirementType, ComparisonOperator,
@@ -11,8 +12,10 @@ from models import (
 )
 import uuid
 import time
+import json
 
 router = APIRouter(prefix="/scenes", tags=["scenes"])
+logger = get_logger(__name__)
 
 # Pydantic schemas
 class SceneBase(BaseModel):
@@ -26,6 +29,9 @@ class SceneBase(BaseModel):
     location: Optional[str] = None
     time_of_day: Optional[str] = None
     weather: Optional[str] = None
+    card_count: Optional[int] = 0
+    prerequisite_scenes: Optional[list] = []
+    days_required: Optional[int] = 0
 
 class SceneCreate(SceneBase):
     attribute_requirements: Optional[dict] = {}
@@ -49,6 +55,9 @@ class SceneUpdate(BaseModel):
     status: Optional[str] = None
     narrator_prompt: Optional[str] = None
     evaluator_config: Optional[dict] = None
+    card_count: Optional[int] = None
+    prerequisite_scenes: Optional[list] = None
+    days_required: Optional[int] = None
 
 class SceneResponse(SceneBase):
     id: str
@@ -72,6 +81,21 @@ class SceneConfigResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+@router.get("/list-all")
+async def get_all_scenes_list(db: Session = Depends(get_db)):
+    """获取所有场景的简要信息，用于前置场景选择"""
+    scenes = db.query(Scene).filter(Scene.is_active == True).all()
+    
+    result = []
+    for scene in scenes:
+        result.append({
+            "scene_id": scene.scene_id,
+            "name": scene.name,
+            "category": scene.category.value if scene.category else None
+        })
+    
+    return result
 
 @router.get("/", response_model=List[SceneResponse])
 async def get_scenes(
@@ -100,6 +124,7 @@ async def get_scenes(
         scene_dict['status'] = scene.status.value if scene.status else 'draft'
         scene_dict['category'] = scene.category.value if scene.category else None
         scene_dict['time_of_day'] = scene.time_of_day.value if scene.time_of_day else None
+        scene_dict['prerequisite_scenes'] = json.loads(scene_dict.get('prerequisite_scenes', '[]'))
         scene_dict['id'] = str(scene.id)  # 转换为字符串
         result.append(SceneResponse(**scene_dict))
     
@@ -117,6 +142,7 @@ async def get_scene(scene_id: str, db: Session = Depends(get_db)):
     scene_dict['status'] = scene.status.value if scene.status else 'draft'
     scene_dict['category'] = scene.category.value if scene.category else None
     scene_dict['time_of_day'] = scene.time_of_day.value if scene.time_of_day else None
+    scene_dict['prerequisite_scenes'] = json.loads(scene_dict.get('prerequisite_scenes', '[]'))
     scene_dict['id'] = str(scene.id)  # 转换为字符串
     
     return SceneResponse(**scene_dict)
@@ -124,33 +150,48 @@ async def get_scene(scene_id: str, db: Session = Depends(get_db)):
 @router.post("/", response_model=SceneResponse)
 async def create_scene(scene: SceneCreate, db: Session = Depends(get_db)):
     """创建新场景"""
-    # 检查scene_id是否已存在
-    existing = db.query(Scene).filter(Scene.scene_id == scene.scene_id).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Scene ID already exists")
+    logger.info(f"开始创建场景: {scene.scene_id} - {scene.name}")
     
-    # 创建场景
-    db_scene = Scene(
-        id=str(uuid.uuid4()),
-        scene_id=scene.scene_id,
-        name=scene.name,
-        category=SceneCategory(scene.category),
-        chapter=scene.chapter,
-        description=scene.description,
-        background_image=scene.background_image,
-        background_music=scene.background_music,
-        location=scene.location,
-        time_of_day=TimeOfDay(scene.time_of_day) if scene.time_of_day else None,
-        weather=scene.weather,
-        status=SceneStatus.DRAFT,
-        is_active=True,
-        created_at=int(time.time()),
-        updated_at=int(time.time())
-    )
-    
-    db.add(db_scene)
-    db.commit()
-    db.refresh(db_scene)
+    try:
+        # 检查scene_id是否已存在
+        existing = db.query(Scene).filter(Scene.scene_id == scene.scene_id).first()
+        if existing:
+            logger.warning(f"场景ID已存在: {scene.scene_id}")
+            raise HTTPException(status_code=400, detail="Scene ID already exists")
+        
+        # 创建场景
+        db_scene = Scene(
+            scene_id=scene.scene_id,
+            name=scene.name,
+            category=SceneCategory(scene.category),
+            chapter=scene.chapter,
+            description=scene.description,
+            background_image=scene.background_image,
+            background_music=scene.background_music,
+            location=scene.location,
+            time_of_day=TimeOfDay(scene.time_of_day) if scene.time_of_day else None,
+            weather=scene.weather,
+            card_count=scene.card_count,
+            prerequisite_scenes=json.dumps(scene.prerequisite_scenes),
+            days_required=scene.days_required,
+            status=SceneStatus.DRAFT,
+            is_active=True,
+            created_at=int(time.time()),
+            updated_at=int(time.time())
+        )
+        
+        db.add(db_scene)
+        db.commit()
+        db.refresh(db_scene)
+        
+        logger.info(f"场景创建成功: {db_scene.id} - {scene.scene_id}")
+        log_database_operation("CREATE", "scenes", db_scene.id)
+        
+    except Exception as e:
+        logger.error(f"创建场景失败: {scene.scene_id} - {str(e)}")
+        log_database_operation("CREATE", "scenes", scene.scene_id, str(e))
+        db.rollback()
+        raise
     
     # 创建场景AI配置 - 暂时跳过，先测试基本功能
     # if scene.narrator_prompt:
@@ -169,6 +210,8 @@ async def create_scene(scene: SceneCreate, db: Session = Depends(get_db)):
     scene_dict['npc_count'] = 0
     scene_dict['status'] = 'draft'
     scene_dict['category'] = scene.category
+    scene_dict['prerequisite_scenes'] = json.loads(scene_dict.get('prerequisite_scenes', '[]'))
+    scene_dict['id'] = str(db_scene.id)
     
     return SceneResponse(**scene_dict)
 
@@ -195,6 +238,7 @@ async def update_scene(scene_id: str, scene_update: SceneUpdate, db: Session = D
     scene_dict['status'] = db_scene.status.value if db_scene.status else 'draft'
     scene_dict['category'] = db_scene.category.value if db_scene.category else None
     scene_dict['time_of_day'] = db_scene.time_of_day.value if db_scene.time_of_day else None
+    scene_dict['prerequisite_scenes'] = json.loads(scene_dict.get('prerequisite_scenes', '[]'))
     scene_dict['id'] = str(db_scene.id)  # 转换为字符串
     
     return SceneResponse(**scene_dict)
@@ -586,13 +630,33 @@ async def remove_scene_card_binding(
 # === 新增：扩展奖励系统API ===
 
 class ExtendedRewardSchema(BaseModel):
+    # 成功奖励
     success_attribute_points: int = 0
     success_experience: int = 0
     success_reputation: int = 0
     success_gold: int = 0
+    
+    # 失败惩罚 - 基础数值
     failure_reputation: int = 0
-    failure_gold: int = 0
-    failure_attribute_penalty: int = 0
+    
+    # 失败惩罚 - 各属性具体惩罚数值
+    failure_strength_penalty: int = 0      # 力量惩罚
+    failure_defense_penalty: int = 0       # 防御惩罚
+    failure_intelligence_penalty: int = 0  # 智力惩罚
+    failure_charisma_penalty: int = 0      # 魅力惩罚
+    failure_loyalty_penalty: int = 0       # 忠诚惩罚
+    failure_influence_penalty: int = 0     # 影响力惩罚
+    failure_command_penalty: int = 0       # 指挥力惩罚
+    failure_stealth_penalty: int = 0       # 隐秘惩罚
+    
+    # 失败惩罚 - 生命值惩罚
+    failure_health_penalty: int = 0
+    failure_health_penalty_type: str = "fixed"  # "fixed" 或 "percentage"
+    
+    # 失败惩罚说明
+    failure_penalty_description: Optional[str] = ""
+    
+    # 奖励内容
     reward_cards: Optional[List[Dict]] = []  # [{"card_id": "xxx", "quantity": 1, "probability": 1.0}]
     reward_npcs: Optional[List[Dict]] = []   # [{"npc_id": "xxx", "quantity": 1, "probability": 1.0}]
     special_rewards: Optional[Dict] = {}
@@ -615,13 +679,33 @@ async def get_scene_extended_rewards(scene_id: str, db: Session = Depends(get_db
     if not reward_config:
         # 如果没有配置，返回默认值
         return {
+            # 成功奖励
             "success_attribute_points": 0,
             "success_experience": 0,
             "success_reputation": 0,
             "success_gold": 0,
+            
+            # 失败惩罚 - 基础数值
             "failure_reputation": 0,
-            "failure_gold": 0,
-            "failure_attribute_penalty": 0,
+            
+            # 失败惩罚 - 各属性具体惩罚数值
+            "failure_strength_penalty": 0,
+            "failure_defense_penalty": 0,
+            "failure_intelligence_penalty": 0,
+            "failure_charisma_penalty": 0,
+            "failure_loyalty_penalty": 0,
+            "failure_influence_penalty": 0,
+            "failure_command_penalty": 0,
+            "failure_stealth_penalty": 0,
+            
+            # 失败惩罚 - 生命值惩罚
+            "failure_health_penalty": 0,
+            "failure_health_penalty_type": "fixed",
+            
+            # 失败惩罚说明
+            "failure_penalty_description": "",
+            
+            # 奖励内容
             "reward_cards": [],
             "reward_npcs": [],
             "special_rewards": {},
@@ -631,13 +715,33 @@ async def get_scene_extended_rewards(scene_id: str, db: Session = Depends(get_db
         }
     
     return {
+        # 成功奖励
         "success_attribute_points": reward_config.success_attribute_points,
         "success_experience": reward_config.success_experience,
         "success_reputation": reward_config.success_reputation,
         "success_gold": reward_config.success_gold,
-        "failure_reputation": reward_config.failure_reputation,
-        "failure_gold": reward_config.failure_gold,
-        "failure_attribute_penalty": reward_config.failure_attribute_penalty,
+        
+        # 失败惩罚 - 基础数值
+        "failure_reputation": getattr(reward_config, 'failure_reputation', 0),
+        
+        # 失败惩罚 - 各属性具体惩罚数值
+        "failure_strength_penalty": getattr(reward_config, 'failure_strength_penalty', 0),
+        "failure_defense_penalty": getattr(reward_config, 'failure_defense_penalty', 0),
+        "failure_intelligence_penalty": getattr(reward_config, 'failure_intelligence_penalty', 0),
+        "failure_charisma_penalty": getattr(reward_config, 'failure_charisma_penalty', 0),
+        "failure_loyalty_penalty": getattr(reward_config, 'failure_loyalty_penalty', 0),
+        "failure_influence_penalty": getattr(reward_config, 'failure_influence_penalty', 0),
+        "failure_command_penalty": getattr(reward_config, 'failure_command_penalty', 0),
+        "failure_stealth_penalty": getattr(reward_config, 'failure_stealth_penalty', 0),
+        
+        # 失败惩罚 - 生命值惩罚
+        "failure_health_penalty": getattr(reward_config, 'failure_health_penalty', 0),
+        "failure_health_penalty_type": getattr(reward_config, 'failure_health_penalty_type', 'fixed'),
+        
+        # 失败惩罚说明
+        "failure_penalty_description": getattr(reward_config, 'failure_penalty_description', ''),
+        
+        # 奖励内容
         "reward_cards": reward_config.reward_cards or [],
         "reward_npcs": reward_config.reward_npcs or [],
         "special_rewards": reward_config.special_rewards or {},
@@ -720,3 +824,62 @@ async def get_available_player_npcs(db: Session = Depends(get_db)):
         })
     
     return result
+
+# === 新增：场景展示配置API ===
+
+class SceneDisplayConfigSchema(BaseModel):
+    card_count: int = 0                    # 折卡数量
+    prerequisite_scenes: List[str] = []    # 前置场景ID列表
+    days_required: int = 0                 # 天数要求
+
+@router.get("/{scene_id}/display-config")
+async def get_scene_display_config(scene_id: str, db: Session = Depends(get_db)):
+    """获取场景展示配置"""
+    scene = db.query(Scene).filter(Scene.id == scene_id).first()
+    if not scene:
+        raise HTTPException(status_code=404, detail="Scene not found")
+    
+    return {
+        "card_count": scene.card_count or 0,
+        "prerequisite_scenes": json.loads(scene.prerequisite_scenes or '[]'),
+        "days_required": scene.days_required or 0
+    }
+
+@router.post("/{scene_id}/display-config")
+async def save_scene_display_config(
+    scene_id: str, 
+    config: SceneDisplayConfigSchema, 
+    db: Session = Depends(get_db)
+):
+    """保存场景展示配置"""
+    scene = db.query(Scene).filter(Scene.id == scene_id).first()
+    if not scene:
+        raise HTTPException(status_code=404, detail="Scene not found")
+    
+    # 验证前置场景ID的有效性
+    if config.prerequisite_scenes:
+        for prereq_scene_id in config.prerequisite_scenes:
+            prereq_scene = db.query(Scene).filter(Scene.scene_id == prereq_scene_id).first()
+            if not prereq_scene:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Prerequisite scene '{prereq_scene_id}' not found"
+                )
+    
+    # 更新场景展示配置
+    scene.card_count = config.card_count
+    scene.prerequisite_scenes = json.dumps(config.prerequisite_scenes)
+    scene.days_required = config.days_required
+    scene.updated_at = int(time.time())
+    
+    db.commit()
+    db.refresh(scene)
+    
+    return {
+        "message": "Scene display configuration saved successfully",
+        "data": {
+            "card_count": scene.card_count,
+            "prerequisite_scenes": json.loads(scene.prerequisite_scenes or '[]'),
+            "days_required": scene.days_required
+        }
+    }

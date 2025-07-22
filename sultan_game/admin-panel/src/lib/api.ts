@@ -35,6 +35,9 @@ export const sceneAPI = {
   getAvailableCards: () => apiClient.get('/api/cards/'),
   getAvailablePlayerNPCs: () => apiClient.get('/api/npcs/'),
   testScene: (id: string) => apiClient.post(`/api/scenes/${id}/test`),
+  getSceneDisplayConfig: (id: string) => apiClient.get(`/api/scenes/${id}/display-config`),
+  saveSceneDisplayConfig: (id: string, data: any) => apiClient.post(`/api/scenes/${id}/display-config`, data),
+  getAllScenesList: () => apiClient.get('/api/scenes/list-all'),
 };
 
 // NPC API
