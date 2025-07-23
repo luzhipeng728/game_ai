@@ -66,7 +66,7 @@ npm run dev
 ### 3. 访问系统
 
 - **前端管理后台**: http://localhost:3000
-- **后端API文档**: http://localhost:8001/docs
+- **后端API文档**: http://82.157.9.52:8001/docs
 - **API测试**: 运行 `node test-api.js`
 
 ## 核心功能演示

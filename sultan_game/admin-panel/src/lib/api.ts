@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'http://82.157.9.52:8001'  // 生产环境直接请求后端端口
-  : 'http://localhost:8001';   // 开发环境本地后端
+const API_BASE_URL = 'http://82.157.9.52:8001';  // 统一使用线上后端地址
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
